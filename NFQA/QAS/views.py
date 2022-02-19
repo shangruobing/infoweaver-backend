@@ -63,7 +63,6 @@ class NoticeView(APIView):
     def get(self, request, pk, *args, **kwargs):
         notices = self.get_object(pk)
         serializer = NoticeSerializer(notices, context={'request': request})
-        print(serializer.data)
         file_path = "C:\\Users\\冰\\Desktop\\NFQA后端开发\\public\\Word\\" + serializer.data['name']
         return FileResponse(open(file_path, 'rb'))
         # return StreamingHttpResponse(open(file_path, 'rb'))
@@ -73,7 +72,6 @@ class Neo4jView(APIView):
 
     def post(self, request, *args, **kwargs):
         print("request", request.data)
-        # jieba.enable_paddle()
         question = request.data['question']
         # 词性标注
         question_type = None
@@ -115,62 +113,3 @@ class Neo4jView(APIView):
         paginator = MyPagination()
         page_user_list = paginator.paginate_queryset(serializer.data, self.request, view=self)
         return paginator.get_paginated_response(page_user_list)
-        # return Response(serializer.data, status=status.HTTP_200_OK)
-
-# class UserListView(APIView):
-#     authentication_classes = []
-#     permission_classes = []
-#
-#     @method_decorator(cache_page(60 * 60 * 2))
-#     # @method_decorator(vary_on_headers("Authorization", ))
-#     def get(self, request, *args, **kwargs):
-#         users = User.objects.all()
-#         user_serializer = UserSerializer(users, many=True)
-#         paginator = MyPagination()
-#         page_user_list = paginator.paginate_queryset(user_serializer.data,
-#                                                      self.request, view=self)
-#         return paginator.get_paginated_response(page_user_list)
-#
-#     def post(self, request, *args, **kwargs):
-#         serializer = UserSerializer(data=request.data)
-#         print(request.data)
-#         if serializer.is_valid():
-#             serializer.save()
-#             return Response(serializer.data, status=status.HTTP_201_CREATED)
-#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-#
-#
-# class UserView(APIView):
-#     """
-#     Retrieve, update or delete a user instance.
-#     """
-#
-#     permission_classes = [StudentOnlyReadOwnPermission]
-#
-#     def get_object(self, pk):
-#         try:
-#             return User.objects.get(pk=pk)
-#         except User.DoesNotExist:
-#             raise NotFound("NOT_FOUND")
-#
-#     def get(self, request, pk, *args, **kwargs):
-#         user = self.get_object(pk)
-#         serializer = UserSerializer(user)
-#         return Response(serializer.data)
-#
-#     def put(self, request, pk, *args, **kwargs):
-#         user = self.get_object(pk)
-#         user.user_id = pk
-#         serializer = UserSerializer(user, data=request.data)
-#         if serializer.is_valid():
-#             serializer.save()
-#             return Response(serializer.data)
-#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-#
-#     def delete(self, request, pk, *args, **kwargs):
-#         user = self.get_object(pk)
-#         data = {"message": "Successfully Delete",
-#                 "user_id": user.user_id,
-#                 "username": user.username}
-#         user.delete()
-#         return Response(data, status=status.HTTP_204_NO_CONTENT)
