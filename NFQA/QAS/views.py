@@ -42,7 +42,6 @@ class NoticeListView(APIView):
 
         try:
             filePath = r"C:\Users\冰\Desktop\NFQA后端开发\public\Word"  # 文件夹路径
-
             for i, file in enumerate(neoFileName):
                 filename = neoFileName[i] + ".docx"
                 mtime = os.stat(os.path.join(filePath, filename)).st_mtime
@@ -84,7 +83,7 @@ class Neo4jView(APIView):
             question = word
             if flag == 'TIME':
                 question_type = 'time'
-                cypher = f'match(n:{question_type})-[*2]-(answer:Title) where n.name contains "{question}" return answer,id(answer)'
+                cypher = f'match(n:{question_type})-[*2]-(answer:Title)-[*2]-(t:abstract) where n.name contains "{question}" return answer,id(answer)'
             if flag == 'LOC':
                 question_type = 'location'
                 cypher = f'match(n:{question_type})-[*2]-(answer:Title) where n.name contains "{question}" return answer,id(answer)'
