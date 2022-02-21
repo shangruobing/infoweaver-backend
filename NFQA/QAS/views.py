@@ -80,20 +80,20 @@ class Neo4jView(APIView):
 
         cypher = ""
         for word, flag in words:
+            print(word, flag)
+            question = word
             if flag == 'TIME':
                 question_type = 'time'
-                question = word
                 cypher = f'match(n:{question_type})-[*2]-(answer:Title) where n.name contains "{question}" return answer,id(answer)'
-            if flag == 'n':
-                if word in ['文件', '原文件', '原通知']:
-                    answer_type = 'File'
-                    cypher = f'match(n:{question_type})-[*2]-(s:Title)-[]-(answer:{answer_type}) where n.name contains "{question}" return answer,id(s)'
-                    break
-                if word in ['地点', '地址', '地名', '地方', '在哪里', '在哪']:
-                    answer_type = 'location'
-                if word in ['人', '人们', '人民', '人类', '男人', '女人', '小孩', '人物']:
-                    answer_type = 'person'
-                cypher = f'match(n:{question_type})-[*2]-(s:Title)-[*2]-(answer:{answer_type}) where n.name contains "{question}" return answer,id(s)'
+            if flag == 'LOC':
+                question_type = 'location'
+                cypher = f'match(n:{question_type})-[*2]-(answer:Title) where n.name contains "{question}" return answer,id(answer)'
+            if flag == 'ORG':
+                question_type = 'org'
+                cypher = f'match(n:{question_type})-[*2]-(answer:Title) where n.name contains "{question}" return answer,id(answer)'
+            if flag == 'PER':
+                question_type = 'person'
+                cypher = f'match(n:{question_type})-[*2]-(answer:Title) where n.name contains "{question}" return answer,id(answer)'
 
         try:
             graph = Graph("http://localhost:7474", auth=("neo4j", "010209"))
@@ -109,7 +109,7 @@ class Neo4jView(APIView):
         notices = Notice.objects.filter(file_id__in=id_list)
         print("Notices", notices)
         serializer = NoticeSerializer(notices, many=True, context={'request': request})
-        print("serializer data", serializer.data)
+        # print("serializer data", serializer.data)
         paginator = MyPagination()
         page_user_list = paginator.paginate_queryset(serializer.data, self.request, view=self)
         return paginator.get_paginated_response(page_user_list)
