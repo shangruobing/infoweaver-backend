@@ -23,4 +23,5 @@ urlpatterns = [
     path('api/word/', NoticeListView.as_view()),
     path('api/word/<int:pk>', NoticeView.as_view(), name='notice-detail'),
     path('api/neo4j/', Neo4jView.as_view()),
+    path('api/neo4j/<int:pk>', Neo4jView.as_view()),
 ]
