@@ -1,15 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="1d3e6e7d-23e1-4992-9ad2-2fb3ed0ca1de" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Scripts/f2py.exe" beforeDir="false" afterPath="$PROJECT_DIR$/Scripts/f2py.exe" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Scripts/normalizer.exe" beforeDir="false" afterPath="$PROJECT_DIR$/Scripts/normalizer.exe" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Scripts/pip.exe" beforeDir="false" afterPath="$PROJECT_DIR$/Scripts/pip.exe" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Scripts/pip3.7.exe" beforeDir="false" afterPath="$PROJECT_DIR$/Scripts/pip3.7.exe" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Scripts/pip3.exe" beforeDir="false" afterPath="$PROJECT_DIR$/Scripts/pip3.exe" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
-    </list>
+    <list default="true" id="1d3e6e7d-23e1-4992-9ad2-2fb3ed0ca1de" name="Changes" comment="Add all words documents" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -63,8 +55,23 @@
       <workItem from="1646465349567" duration="554000" />
       <workItem from="1646465917625" duration="324000" />
       <workItem from="1646466256993" duration="244000" />
-      <workItem from="1646466521488" duration="324000" />
+      <workItem from="1646466521488" duration="577000" />
     </task>
+    <task id="LOCAL-00001" summary="Update requirements.txt">
+      <created>1646466907952</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1646466907952</updated>
+    </task>
+    <task id="LOCAL-00002" summary="commit all words documents">
+      <created>1646467033079</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1646467033079</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -80,6 +87,11 @@
         </entry>
       </map>
     </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="Update requirements.txt" />
+    <MESSAGE value="commit all words documents" />
+    <option name="LAST_COMMIT_MESSAGE" value="commit all words documents" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/NFQA$views.coverage" NAME="views Coverage Results" MODIFIED="1643791721745" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/NFQA/QAS" />
