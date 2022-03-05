@@ -21,6 +21,7 @@ try:
     graph = Graph("http://localhost:7474", auth=("neo4j", "010209"))
 except py2neo.errors.ConnectionUnavailable:
     raise APIException("Neo4j Connection Unavailable", code=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    # print(APIException("Neo4j Connection Unavailable", code=status.HTTP_500_INTERNAL_SERVER_ERROR))
 
 
 class NoticeListView(APIView):
@@ -41,22 +42,25 @@ class NoticeListView(APIView):
         result = graph.run(query).data()
         neoFileName = []
         neoFileId = []
-        neoContent = []
+        # neoContent = []
         for i in result:
             neoFileName.append(i["n"]["name"])
             neoFileId.append(i["id(n)"])
-            neoContent.append(i["collect(t.name)"])
+            # neoContent.append(i["collect(t.name)"])
 
-        try:
-            filePath = r"C:\Users\冰\Desktop\NFQA后端开发\public\Word"  # 文件夹路径
-            for i, file in enumerate(neoFileName):
+        filePath = r"C:\Users\冰\Desktop\NFQA后端开发\public\Word"  # 文件夹路径
+
+        for i, file in enumerate(neoFileName):
+            try:
                 filename = neoFileName[i] + ".docx"
                 mtime = os.stat(os.path.join(filePath, filename)).st_mtime
                 file_modify_time = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(mtime))
-                Notice(name=filename, date=file_modify_time, file_id=neoFileId[i], content=neoContent[i]).save()
-            return Response("Word文件信息已经成功导入Mysql")
-        except Exception:
-            return Response("Word文件信息录入错误 可能是由于主键重复", status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                Notice(name=filename, date=file_modify_time, file_id=neoFileId[i]).save()
+            except Exception as e:
+                print(e)
+                continue
+
+        return Response("Word文件信息导入MySQL完成 但可能存在错误 需要在Django端查看")
 
 
 class NoticeView(APIView):
