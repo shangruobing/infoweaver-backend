@@ -2,31 +2,13 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="1d3e6e7d-23e1-4992-9ad2-2fb3ed0ca1de" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/Scripts/activate" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Scripts/activate.bat" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Scripts/activate.fish" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Scripts/activate.ps1" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Scripts/activate.xsh" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Scripts/activate_this.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Scripts/deactivate.bat" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Scripts/django-admin.exe" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Scripts/django-admin.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Scripts/f2py.exe" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Scripts/normalizer.exe" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Scripts/pip.exe" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Scripts/pip3.7.exe" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Scripts/pip3.exe" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Scripts/pydoc.bat" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Scripts/pygmentize.exe" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Scripts/python.exe" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Scripts/pythonw.exe" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Scripts/sqlformat.exe" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Scripts/wheel-3.7.exe" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Scripts/wheel.exe" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Scripts/wheel3.7.exe" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Scripts/wheel3.exe" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Scripts/f2py.exe" beforeDir="false" afterPath="$PROJECT_DIR$/Scripts/f2py.exe" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Scripts/normalizer.exe" beforeDir="false" afterPath="$PROJECT_DIR$/Scripts/normalizer.exe" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Scripts/pip.exe" beforeDir="false" afterPath="$PROJECT_DIR$/Scripts/pip.exe" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Scripts/pip3.7.exe" beforeDir="false" afterPath="$PROJECT_DIR$/Scripts/pip3.7.exe" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Scripts/pip3.exe" beforeDir="false" afterPath="$PROJECT_DIR$/Scripts/pip3.exe" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -49,6 +31,9 @@
   </component>
   <component name="MarkdownSettingsMigration">
     <option name="stateVersion" value="1" />
+  </component>
+  <component name="ProblemsViewState">
+    <option name="selectedTabId" value="ProjectErrors" />
   </component>
   <component name="ProjectId" id="25xBW0tqQ8Jbsvtd58TTf0o9N4v" />
   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
@@ -75,7 +60,10 @@
       <updated>1646458889347</updated>
       <workItem from="1646458891253" duration="245000" />
       <workItem from="1646465007650" duration="229000" />
-      <workItem from="1646465349567" duration="346000" />
+      <workItem from="1646465349567" duration="554000" />
+      <workItem from="1646465917625" duration="324000" />
+      <workItem from="1646466256993" duration="244000" />
+      <workItem from="1646466521488" duration="324000" />
     </task>
     <servers />
   </component>
