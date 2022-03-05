@@ -20,8 +20,8 @@ jieba.enable_paddle()
 try:
     graph = Graph("http://localhost:7474", auth=("neo4j", "010209"))
 except py2neo.errors.ConnectionUnavailable:
-    raise APIException("Neo4j Connection Unavailable", code=status.HTTP_500_INTERNAL_SERVER_ERROR)
-    # print(APIException("Neo4j Connection Unavailable", code=status.HTTP_500_INTERNAL_SERVER_ERROR))
+    # raise APIException("Neo4j Connection Unavailable", code=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    print(APIException("Neo4j Connection Unavailable", code=status.HTTP_500_INTERNAL_SERVER_ERROR))
 
 
 class NoticeListView(APIView):
