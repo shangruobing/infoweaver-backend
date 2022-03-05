@@ -137,9 +137,6 @@ dmypy.json
 # Cython debug symbols
 cython_debug/
 
-/NFQA/QAS/migrations/0001_initial.py
-/NFQA/makemigrations
-
 /public/
-
-/.idea/
+#
+#/.idea/
