@@ -24,6 +24,11 @@ except py2neo.errors.ConnectionUnavailable:
     print(APIException("Neo4j Connection Unavailable", code=status.HTTP_500_INTERNAL_SERVER_ERROR))
 
 
+class HomeView(APIView):
+    def get(self, request, *args, **kwargs):
+        return Response("Welcome Notice File Question & Answer System !", status=status.HTTP_200_OK)
+
+
 class NoticeListView(APIView):
 
     def get(self, request, *args, **kwargs):
@@ -87,37 +92,51 @@ class Neo4jView(APIView):
     def post(self, request, *args, **kwargs):
         print("request", request.data)
         question = request.data['question']
-        # 词性标注
         words = pseg.cut(question, use_paddle=True)
+        condition = []
+        nodes_label = {
+            "TIME": "time",
+            "LOC": "location",
+            "ORG": "org",
+            "PER": "person"
+        }
+        print("Paddle 词性标注结果")
+        for question, flag in words:
+            print(question, flag)
+            try:
+                condition.append({'question_type': nodes_label[flag], 'question': question})
+            except KeyError as e:
+                print(e)
+                continue
 
-        cypher = ""
-        for word, flag in words:
-            print(word, flag)
-            question = word
+        id_list = self.__execute_query(condition)
 
-            if flag == 'TIME':
-                question_type = 'time'
-                cypher = f'match(n:{question_type})-[*2]-(answer:Title) where n.name contains "{question}" return answer,id(answer)'
-            if flag == 'LOC':
-                question_type = 'location'
-                cypher = f'match(n:{question_type})-[*2]-(answer:Title) where n.name contains "{question}" return answer,id(answer)'
-            if flag == 'ORG':
-                question_type = 'org'
-                cypher = f'match(n:{question_type})-[*2]-(answer:Title) where n.name contains "{question}" return answer,id(answer)'
-            if flag == 'PER':
-                question_type = 'person'
-                cypher = f'match(n:{question_type})-[*2]-(answer:Title) where n.name contains "{question}" return answer,id(answer)'
-
-        answer = graph.run(cypher).data()
-        print('cypher:', cypher)
-        print('answer', answer)
-
-        id_list = [i['id(answer)'] for i in answer]
-
-        print("ID List", id_list)
         notices = Notice.objects.filter(file_id__in=id_list)
-        print("Notices", notices)
         serializer = NoticeSerializer(notices, many=True, context={'request': request})
         paginator = MyPagination()
         page_user_list = paginator.paginate_queryset(serializer.data, self.request, view=self)
         return paginator.get_paginated_response(page_user_list)
+
+    def __execute_query(self, condition):
+        """输入条件列表 输出查询到的文件ID列表"""
+        cypher = self.__get_cypher(condition)
+        answer = graph.run(cypher).data()
+        id_list = [i['id(answer)'] for i in answer]
+
+        print('cypher:', cypher)
+        print('answer', answer)
+        print("id list", id_list)
+
+        return id_list
+
+    def __get_cypher(self, condition):
+        cypher = ""
+        if len(condition) == 1:
+            cypher = f'match(n:{condition[0]["question_type"]})-[*2]-(answer:Title) where n.name contains "{condition[0]["question"]}" return answer,id(answer)'
+        elif len(condition) == 2:
+            cypher = f'match(n:{condition[0]["question_type"]})-[*2]-(answer:Title) where n.name contains "{condition[0]["question"]}" with answer match (answer)-[*2]-(s:{condition[1]["question_type"]}) where s.name contains "{condition[1]["question"]}" return answer,id(answer)'
+        elif len(condition) == 3:
+            cypher = f'match(n:{condition[0]["question_type"]})-[*2]-(answer:Title) where n.name contains "{condition[0]["question"]}" with answer match (answer)-[*2]-(s:{condition[1]["question_type"]}) where s.name contains "{condition[1]["question"]}" with answer match (answer)-[*2]-(c:{condition[2]["question_type"]}) where c.name contains "{condition[2]["question"]}" return answer,id(answer)'
+        elif len(condition) == 4:
+            cypher = f'match(n:{condition[0]["question_type"]})-[*2]-(answer:Title) where n.name contains "{condition[0]["question"]}" with answer match (answer)-[*2]-(s:{condition[1]["question_type"]}) where s.name contains "{condition[1]["question"]}" with answer match (answer)-[*2]-(c:{condition[2]["question_type"]}) where c.name contains "{condition[2]["question"]}" with answer match (answer)-[*2]-(d:{condition[3]["question_type"]}) where d.name contains "{condition[3]["question"]}" return answer,id(answer)'
+        return cypher
