@@ -5,7 +5,7 @@ from .models import Notice
 import os
 from django.http import FileResponse
 from .serializers import NoticeSerializer
-from .pagination import MyPagination
+from .pagination import FileListPagination, NoticePagination
 from .filters import NoticeFilterBackend
 import time
 from rest_framework import status
@@ -49,7 +49,7 @@ class NoticeListView(APIView):
         notice_filter = NoticeFilterBackend()
         notices = notice_filter.filter_queryset(request, notices, view=self)
         serializer = NoticeSerializer(notices, many=True, context={'request': request})
-        paginator = MyPagination()
+        paginator = FileListPagination()
         page_user_list = paginator.paginate_queryset(serializer.data, self.request, view=self)
         return paginator.get_paginated_response(page_user_list)
 
@@ -112,25 +112,13 @@ class Neo4jView(APIView):
             print(notices)
         else:
             print("进行Neo4j查询")
-            id_list = self.__execute_neo4j_query(question)
+            id_list = self.__execute_cypher_query(question)
             notices = Notice.objects.filter(file_id__in=id_list)
 
         serializer = NoticeSerializer(notices, many=True, context={'request': request})
-        paginator = MyPagination()
+        paginator = NoticePagination()
         page_user_list = paginator.paginate_queryset(serializer.data, self.request, view=self)
         return paginator.get_paginated_response(page_user_list)
-
-    def __execute_query(self, condition: []) -> []:
-        """输入条件列表 输出查询到的文件ID列表"""
-        cypher = self.__get_cypher(condition)
-        answer = graph.run(cypher).data()
-        id_list = [i['id(answer)'] for i in answer]
-
-        print('cypher:', cypher)
-        print('answer', answer)
-        print("id list", id_list)
-
-        return id_list
 
     def __get_cypher(self, condition: []) -> str:
         cypher = ""
@@ -144,7 +132,8 @@ class Neo4jView(APIView):
             cypher = f'match(n:{condition[0]["question_type"]})-[*2]-(answer:Title) where n.name contains "{condition[0]["question"]}" with answer match (answer)-[*2]-(s:{condition[1]["question_type"]}) where s.name contains "{condition[1]["question"]}" with answer match (answer)-[*2]-(c:{condition[2]["question_type"]}) where c.name contains "{condition[2]["question"]}" with answer match (answer)-[*2]-(d:{condition[3]["question_type"]}) where d.name contains "{condition[3]["question"]}" return answer,id(answer)'
         return cypher
 
-    def __execute_neo4j_query(self, question: str) -> []:
+    def __execute_cypher_query(self, question: str) -> []:
+        """输入条件列表 输出查询到的文件ID列表"""
         words = pseg.cut(question, use_paddle=True)
         condition = []
         nodes_label = {
@@ -162,5 +151,7 @@ class Neo4jView(APIView):
                 print(e)
                 continue
 
-        id_list = self.__execute_query(condition)
+        cypher = self.__get_cypher(condition)
+        answer = graph.run(cypher).data()
+        id_list = [i['id(answer)'] for i in answer]
         return id_list
