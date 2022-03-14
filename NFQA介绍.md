@@ -46,29 +46,29 @@
 
 提问涉及到文件名称，如《“我爱昆工”校园文化创意产品设计大赛》，系统在字典中匹配到该项目，则直接进入MySQL查询并返回。
 
-<img src="C:/Users/%E5%86%B0/AppData/Roaming/Typora/typora-user-images/image-20220314205056653.png" alt="image-20220314205056653" style="zoom:40%;" />
+<img src="https://gitee.com/shangruobing/markdown-drawing-bed/raw/master/image/image-20220314205056653.png" alt="image-20220314205056653" style="zoom:40%;" />
 
 #### Neo4j查询
 
 提问没有涉及文件名称，则进入图数据库端的查询，利用jieba进行语义分析，同时生成Cypher查询语句。
 
-<img src="C:/Users/%E5%86%B0/AppData/Roaming/Typora/typora-user-images/image-20220314211632338.png" alt="image-20220314211632338" style="zoom:67%;" />
+<img src="https://gitee.com/shangruobing/markdown-drawing-bed/raw/master/image/image-20220314211632338.png" alt="image-20220314211632338" style="zoom:67%;" />
 
 #### 查询失败，未能识别问题
 
-<img src="C:/Users/%E5%86%B0/AppData/Roaming/Typora/typora-user-images/image-20220314211732717.png" alt="image-20220314211732717" style="zoom:45%;" />
+<img src="https://gitee.com/shangruobing/markdown-drawing-bed/raw/master/image/image-20220314211732717.png" alt="image-20220314211732717" style="zoom:45%;" />
 
 #### 输入的文件名不准确或数据库中没有该文件未得到结果
 
-<img src="C:/Users/%E5%86%B0/AppData/Roaming/Typora/typora-user-images/image-20220314230514514.png" alt="image-20220314230514514" style="zoom:45%;" />
+<img src="https://gitee.com/shangruobing/markdown-drawing-bed/raw/master/image/image-20220314230514514.png" alt="image-20220314230514514" style="zoom:45%;" />
 
 #### 非法输入
 
-<img src="C:/Users/%E5%86%B0/AppData/Roaming/Typora/typora-user-images/image-20220314165315288.png" alt="image-20220314165315288" style="zoom:50%;" />
+<img src="https://gitee.com/shangruobing/markdown-drawing-bed/raw/master/image/image-20220314165315288.png" alt="image-20220314165315288" style="zoom:70%;" />
 
 ### 预览功能
 
-<img src="C:/Users/%E5%86%B0/AppData/Roaming/Typora/typora-user-images/image-20220314182805702.png" alt="image-20220314182805702" style="zoom:50%;" />
+<img src="https://gitee.com/shangruobing/markdown-drawing-bed/raw/master/image/image-20220314182805702.png" alt="image-20220314182805702" style="zoom:50%;" />
 
 
 
@@ -76,4 +76,4 @@
 
 - [ ] 在后端会将清明节识别为TIME
 
-<img src="C:/Users/%E5%86%B0/AppData/Roaming/Typora/typora-user-images/image-20220314165023860.png" alt="image-20220314165023860" style="zoom:67%;" />
+<img src="https://gitee.com/shangruobing/markdown-drawing-bed/raw/master/image/image-20220314165023860.png" alt="image-20220314165023860" style="zoom:67%;" />
