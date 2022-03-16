@@ -15,6 +15,9 @@ import py2neo
 import jieba
 import jieba.posseg as pseg
 import difflib
+import re
+import requests
+from bs4 import BeautifulSoup
 
 # 加载字典
 try:
@@ -117,6 +120,10 @@ class Neo4jView(APIView):
 
         serializer = NoticeSerializer(notices, many=True, context={'request': request})
         paginator = NoticePagination()
+        print("ser", serializer.data)
+        if len(serializer.data) == 0:
+            print("ses1 is empty")
+            return Response(self.baidu_search(question))
         page_user_list = paginator.paginate_queryset(serializer.data, self.request, view=self)
         return paginator.get_paginated_response(page_user_list)
 
@@ -155,3 +162,21 @@ class Neo4jView(APIView):
         answer = graph.run(cypher).data()
         id_list = [i['id(answer)'] for i in answer]
         return id_list
+
+    def baidu_search(self, word="信息管理与信息系统"):
+        headers = {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/98.0.4758.102 Safari/537.36 Edg/98.0.1108.62"
+        }
+
+        url = f'https://baike.baidu.com/item/{word}'
+        response = requests.get(url=url, headers=headers, timeout=10)
+        html_content = response.text
+        soup = BeautifulSoup(html_content, 'lxml')
+
+        li_list = soup.select('.lemma-summary')
+
+        results = [re.sub(r'\[[0-9 \-]+\]', '', i.text).strip() for i in li_list]
+        result = ''.join(results)
+        if len(result) > 100:
+            result = result[:100] + "……"
+        return result
