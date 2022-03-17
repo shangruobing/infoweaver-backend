@@ -46,9 +46,9 @@ def calculate_date_range(date_type, string):
             start_date = get_delta_date(- date.today().weekday() - 7)
             end_date = get_delta_date(- date.today().weekday() - 1)
 
-        if string == "下周":
-            start_date = get_delta_date(date.today().weekday() + 1)
-            end_date = get_delta_date(date.today().weekday() + 7)
+        if string == "下周": 
+            start_date = get_delta_date(-date.today().weekday() + 7)
+            end_date = get_delta_date(-date.today().weekday() + 13)
 
     elif date_type == '月':
         year = date.today().year
