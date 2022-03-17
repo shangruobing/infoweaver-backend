@@ -26,6 +26,8 @@
 
 系统可以根据自然语言处理中的实体识别和语义分析，自动、批量地将通知文件转换为如下的图：
 
+![image-20220316232437243](C:/Users/%E5%86%B0/AppData/Roaming/Typora/typora-user-images/image-20220316232437243.png)
+
 ***目前我们数据库中含有管理与经济学院近10年来的1032篇通知文件，具有16997个结点和23601个关系***
 
 ![image-20220316230723462](C:/Users/%E5%86%B0/AppData/Roaming/Typora/typora-user-images/image-20220316230723462.png)
