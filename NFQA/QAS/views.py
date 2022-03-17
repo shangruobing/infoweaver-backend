@@ -100,6 +100,7 @@ class NoticeView(APIView):
 
 class Neo4jView(APIView):
     def get(self, request, pk, *args, **kwargs):
+        """疑似没用"""
         cypher = f"match (n:Title)-[*2]-(t:abstract) where id(n)={pk} unwind t.name as answer return answer"
         answer = graph.run(cypher).data()
         result = [i['answer'] for i in answer]
@@ -114,17 +115,19 @@ class Neo4jView(APIView):
             notices = Notice.objects.filter(name__icontains=dictResult[0][:-5])
         else:
             print("进行Neo4j查询")
-            id_list = self.__execute_cypher_query(question)
+            id_list = self.execute_jieba_analysis(question)
             notices = Notice.objects.filter(file_id__in=id_list)
 
         serializer = NoticeSerializer(notices, many=True, context={'request': request})
-        paginator = NoticePagination()
         if len(serializer.data) == 0:
+            print("百度百科查询")
             return Response(self.baidu_search(question))
+
+        paginator = NoticePagination()
         page_user_list = paginator.paginate_queryset(serializer.data, self.request, view=self)
         return paginator.get_paginated_response(page_user_list)
 
-    def __get_cypher(self, condition: []) -> str:
+    def get_cypher(self, condition: []) -> str:
         cypher = ""
         if len(condition) == 1:
             cypher = f'match(n:{condition[0]["question_type"]})-[*2]-(answer:Title) where n.name contains "{condition[0]["question"]}" return answer,id(answer)'
@@ -136,7 +139,7 @@ class Neo4jView(APIView):
             cypher = f'match(n:{condition[0]["question_type"]})-[*2]-(answer:Title) where n.name contains "{condition[0]["question"]}" with answer match (answer)-[*2]-(s:{condition[1]["question_type"]}) where s.name contains "{condition[1]["question"]}" with answer match (answer)-[*2]-(c:{condition[2]["question_type"]}) where c.name contains "{condition[2]["question"]}" with answer match (answer)-[*2]-(d:{condition[3]["question_type"]}) where d.name contains "{condition[3]["question"]}" return answer,id(answer)'
         return cypher
 
-    def __execute_cypher_query(self, question: str) -> []:
+    def execute_jieba_analysis(self, question: str) -> []:
         """输入条件列表 输出查询到的文件ID列表"""
         words = pseg.cut(question, use_paddle=True)
         condition = []
@@ -146,17 +149,15 @@ class Neo4jView(APIView):
             "ORG": "org",
             "PER": "person"
         }
-        # print("Paddle 词性标注结果")
+
         for question, flag in words:
             if flag == 'TIME' and question in ["去年", "今年", "明年",
                                                "上个月", "本月", "下个月",
                                                "上周", "本周", "下周",
                                                "昨天", "今天", "明天"]:
+
                 print("进入了MySQL的日期范围匹配")
-                start_date, end_date = str_date_range(question)
-                notices = Notice.objects.all()
-                notice_filter = NoticeFilterBackend()
-                id_list = notice_filter.date_filter(notices, start_date=start_date, end_date=end_date)
+                id_list = self.execute_date_filter(question=question)
                 return id_list
 
             else:
@@ -165,10 +166,17 @@ class Neo4jView(APIView):
                 except KeyError as e:
                     # print(e)
                     continue
-
-        cypher = self.__get_cypher(condition)
+        # for循环结束
+        cypher = self.get_cypher(condition)
         answer = graph.run(cypher).data()
         id_list = [i['id(answer)'] for i in answer]
+        return id_list
+
+    def execute_date_filter(self, question: str) -> []:
+        start_date, end_date = str_date_range(question)
+        notices = Notice.objects.all()
+        notice_filter = NoticeFilterBackend()
+        id_list = notice_filter.date_filter(notices, start_date=start_date, end_date=end_date)
         return id_list
 
     def baidu_search(self, word="信息管理与信息系统"):
