@@ -1,4 +1,3 @@
-from QAS.utils.str2date_range import str_date_range
 from rest_framework.exceptions import NotFound
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -19,7 +18,7 @@ import difflib
 import re
 import requests
 from bs4 import BeautifulSoup
-from .utils import str2date_range
+from .utils.str2date_range import str_date_range
 
 # 加载字典
 try:
@@ -107,14 +106,12 @@ class Neo4jView(APIView):
         return Response(result)
 
     def post(self, request, *args, **kwargs):
-        print("request", request.data)
         question = request.data['question']
 
         dictResult = difflib.get_close_matches(question, myDict, 1, cutoff=0.6)
         if dictResult:
+            print("根据自定义字典查询MySQL")
             notices = Notice.objects.filter(name__icontains=dictResult[0][:-5])
-            print("question存在自定义字典")
-            print(notices)
         else:
             print("进行Neo4j查询")
             id_list = self.__execute_cypher_query(question)
@@ -122,9 +119,7 @@ class Neo4jView(APIView):
 
         serializer = NoticeSerializer(notices, many=True, context={'request': request})
         paginator = NoticePagination()
-        print("ser", serializer.data)
         if len(serializer.data) == 0:
-            print("ses1 is empty")
             return Response(self.baidu_search(question))
         page_user_list = paginator.paginate_queryset(serializer.data, self.request, view=self)
         return paginator.get_paginated_response(page_user_list)
@@ -151,39 +146,25 @@ class Neo4jView(APIView):
             "ORG": "org",
             "PER": "person"
         }
-        print("Paddle 词性标注结果")
-        # question, flag = words[0]
-        # print("第一次que", question)
-        # print("第一次flag", flag)
-        # print(type(words))
+        # print("Paddle 词性标注结果")
         for question, flag in words:
             if flag == 'TIME' and question in ["去年", "今年", "明年",
                                                "上个月", "本月", "下个月",
                                                "上周", "本周", "下周",
                                                "昨天", "今天", "明天"]:
-                print(question, flag)
+                print("进入了MySQL的日期范围匹配")
                 start_date, end_date = str_date_range(question)
-                print("start_date", start_date)
-                print("end_date", end_date)
-                print("进入了谢谢下下下")
                 notices = Notice.objects.all()
                 notice_filter = NoticeFilterBackend()
-                # request = {"query_params": {
-                #     "start_date": [start_date],
-                #     "end_date": [end_date],
-                # }}
                 id_list = notice_filter.date_filter(notices, start_date=start_date, end_date=end_date)
                 return id_list
-                # serializer = NoticeSerializer(notices, many=True, context={'request': request})
-                # paginator = NoticePagination()
-                # page_user_list = paginator.paginate_queryset(serializer.data, self.request, view=self)
-                # return paginator.get_paginated_response(page_user_list)
-            # else:
-            try:
-                condition.append({'question_type': nodes_label[flag], 'question': question})
-            except KeyError as e:
-                print(e)
-                continue
+
+            else:
+                try:
+                    condition.append({'question_type': nodes_label[flag], 'question': question})
+                except KeyError as e:
+                    # print(e)
+                    continue
 
         cypher = self.__get_cypher(condition)
         answer = graph.run(cypher).data()
