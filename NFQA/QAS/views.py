@@ -1,3 +1,4 @@
+from QAS.utils.str2date_range import str_date_range
 from rest_framework.exceptions import NotFound
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -18,6 +19,7 @@ import difflib
 import re
 import requests
 from bs4 import BeautifulSoup
+from .utils import str2date_range
 
 # 加载字典
 try:
@@ -150,8 +152,33 @@ class Neo4jView(APIView):
             "PER": "person"
         }
         print("Paddle 词性标注结果")
+        # question, flag = words[0]
+        # print("第一次que", question)
+        # print("第一次flag", flag)
+        # print(type(words))
         for question, flag in words:
-            print(question, flag)
+            if flag == 'TIME' and question in ["去年", "今年", "明年",
+                                               "上个月", "本月", "下个月",
+                                               "上周", "本周", "下周",
+                                               "昨天", "今天", "明天"]:
+                print(question, flag)
+                start_date, end_date = str_date_range(question)
+                print("start_date", start_date)
+                print("end_date", end_date)
+                print("进入了谢谢下下下")
+                notices = Notice.objects.all()
+                notice_filter = NoticeFilterBackend()
+                # request = {"query_params": {
+                #     "start_date": [start_date],
+                #     "end_date": [end_date],
+                # }}
+                id_list = notice_filter.date_filter(notices, start_date=start_date, end_date=end_date)
+                return id_list
+                # serializer = NoticeSerializer(notices, many=True, context={'request': request})
+                # paginator = NoticePagination()
+                # page_user_list = paginator.paginate_queryset(serializer.data, self.request, view=self)
+                # return paginator.get_paginated_response(page_user_list)
+            # else:
             try:
                 condition.append({'question_type': nodes_label[flag], 'question': question})
             except KeyError as e:
