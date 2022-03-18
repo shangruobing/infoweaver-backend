@@ -22,7 +22,7 @@ from .utils.str2date_range import str_date_range
 
 # 加载字典
 try:
-    with open(r'C:\Users\冰\Desktop\NFQA后端开发\public\mydict.txt', encoding='UTF-8') as dict_file:
+    with open(r'..\public\mydict.txt', encoding='UTF-8') as dict_file:
         myDict = dict_file.readlines()
         print("Custom file dictionary loaded successfully")
 except Exception:
@@ -69,7 +69,7 @@ class NoticeListView(APIView):
             neoFileName.append(i["n"]["name"])
             neoFileId.append(i["id(n)"])
 
-        filePath = r"C:\Users\冰\Desktop\NFQA后端开发\public\Word"  # 文件夹路径
+        filePath = r"..\public\Word"  # 文件夹路径
 
         for i, file in enumerate(neoFileName):
             try:
@@ -94,7 +94,7 @@ class NoticeView(APIView):
     def get(self, request, pk, *args, **kwargs):
         notices = self.get_object(pk)
         serializer = NoticeSerializer(notices, context={'request': request})
-        file_path = "C:\\Users\\冰\\Desktop\\NFQA后端开发\\public\\Word\\" + serializer.data['name']
+        file_path = "..\\public\\Word\\" + serializer.data['name']
         return FileResponse(open(file_path, 'rb'))
 
 
