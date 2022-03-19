@@ -131,20 +131,32 @@ class Neo4jView(APIView):
 
     def execute_neo4j_query(self, question: str) -> []:
         """输入条件列表 输出查询到的文件ID列表"""
-        id_list = self.search_by_jieba(question)
-        if not id_list:
-            id_list = self.search_by_paddle(question)
+        sql_list = self.search_by_jieba(question)
+        neo_list = self.search_by_paddle(question)
+        print("jieba查询结果", sql_list)
+        print("Paddle查询结果", neo_list)
+        id_list = []
+        if sql_list and neo_list:
+            id_list = set(sql_list).intersection(set(neo_list))
+            print("jieba & Paddle结果交集", id_list)
+        elif sql_list:
+            id_list = sql_list
+            print('jieba结果集 Paddle结果为空', id_list)
+        elif neo_list:
+            id_list = neo_list
+            print("Paddle结果集 jieba结果为空", id_list)
         return id_list
 
     def search_by_paddle(self, question: str) -> []:
         condition = self.get_cypher_condition(question)
         cypher = self.get_cypher(condition)
+        print("Cypher", cypher)
         answer = graph.run(cypher).data()
         id_list = [i['id(answer)'] for i in answer]
         return id_list
 
     def get_cypher_condition(self, question: str) -> []:
-        # 飞剑分词 图数据库查询
+        # Paddle分词 图数据库查询
         words = pseg.cut(question, use_paddle=True)
         condition = []
         nodes_label = {
@@ -153,6 +165,7 @@ class Neo4jView(APIView):
             "ORG": "org",
             "PER": "person"
         }
+        print("Paddle识别开始")
         for question, flag in words:
             print(question, flag)
             if flag == 'TIME' and question in ["去年", "今年", "明年",
@@ -168,21 +181,21 @@ class Neo4jView(APIView):
                 try:
                     condition.append({'question_type': nodes_label[flag], 'question': question})
                 except KeyError as e:
-                    # print(e)
+                    print("KeyError", e)
                     continue
 
         return condition
 
     def search_by_jieba(self, question: str) -> []:
         jieba_words = pseg.cut(question, use_paddle=False)
+        print("jieba识别开始")
         for i, flag in jieba_words:
-            print(question, flag)
+            print(i, flag)
             if flag == "event":
-                print("一个自定义Event", i)
+                print("jieba识别一个自定义的Event Label", i)
                 queryset = Notice.objects.filter(label__icontains=i)
                 id_list = [i.file_id for i in queryset]
                 return id_list
-        # return None
 
     def execute_date_filter(self, question: str) -> []:
         start_date, end_date = str_date_range(question)
