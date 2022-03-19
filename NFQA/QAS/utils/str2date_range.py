@@ -4,7 +4,8 @@ import calendar
 import jieba
 import jieba.posseg as pseg
 
-jieba.enable_paddle()
+
+# jieba.enable_paddle()
 
 
 def get_jieba_date(string) -> str:
@@ -37,8 +38,10 @@ def execute_str2date(date_type, string):
             start_date = date.today().strftime(date_format)
         if string == "昨天":
             start_date = get_delta_date(-1)
+            end_date = get_delta_date(0)
         if string == "明天":
             start_date = get_delta_date(1)
+            end_date = get_delta_date(2)
 
     elif date_type == '周':
         if string == "本周":

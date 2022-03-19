@@ -25,7 +25,7 @@ class NoticeFilterBackend(filters.BaseFilterBackend):
             try:
                 end_date = datetime.strptime(end_date, '%Y%m%d')
             except (ValueError, TypeError):
-                end_date = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+                end_date = time.strftime("%Y%m%d", time.localtime())
 
             queryset = queryset.filter(date__range=(start_date, end_date))
 

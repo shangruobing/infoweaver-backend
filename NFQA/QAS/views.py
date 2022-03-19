@@ -22,6 +22,7 @@ from .utils.str2date_range import str_date_range
 
 # 加载字典
 try:
+    jieba.load_userdict(r'..\public\dictionary.txt')
     with open(r'..\public\mydict.txt', encoding='UTF-8') as dict_file:
         myDict = dict_file.readlines()
         print("Custom file dictionary loaded successfully")
@@ -108,39 +109,42 @@ class Neo4jView(APIView):
 
     def post(self, request, *args, **kwargs):
         question = request.data['question']
+        print("question:", question)
 
-        dictResult = difflib.get_close_matches(question, myDict, 1, cutoff=0.6)
+        dictResult = difflib.get_close_matches(question, myDict, 1, cutoff=0.8)
         if dictResult:
             print("根据自定义字典查询MySQL")
             notices = Notice.objects.filter(name__icontains=dictResult[0][:-5])
         else:
-            print("进行Neo4j查询")
-            id_list = self.execute_jieba_analysis(question)
+            print("自定义字典查询失败 进行Neo4j查询")
+            id_list = self.execute_neo4j_query(question)
             notices = Notice.objects.filter(file_id__in=id_list)
 
         serializer = NoticeSerializer(notices, many=True, context={'request': request})
         if len(serializer.data) == 0:
-            print("百度百科查询")
+            print("Neo4查询失败 百度百科查询")
             return Response(self.baidu_search(question))
 
         paginator = NoticePagination()
         page_user_list = paginator.paginate_queryset(serializer.data, self.request, view=self)
         return paginator.get_paginated_response(page_user_list)
 
-    def get_cypher(self, condition: []) -> str:
-        cypher = ""
-        if len(condition) == 1:
-            cypher = f'match(n:{condition[0]["question_type"]})-[*2]-(answer:Title) where n.name contains "{condition[0]["question"]}" return answer,id(answer)'
-        elif len(condition) == 2:
-            cypher = f'match(n:{condition[0]["question_type"]})-[*2]-(answer:Title) where n.name contains "{condition[0]["question"]}" with answer match (answer)-[*2]-(s:{condition[1]["question_type"]}) where s.name contains "{condition[1]["question"]}" return answer,id(answer)'
-        elif len(condition) == 3:
-            cypher = f'match(n:{condition[0]["question_type"]})-[*2]-(answer:Title) where n.name contains "{condition[0]["question"]}" with answer match (answer)-[*2]-(s:{condition[1]["question_type"]}) where s.name contains "{condition[1]["question"]}" with answer match (answer)-[*2]-(c:{condition[2]["question_type"]}) where c.name contains "{condition[2]["question"]}" return answer,id(answer)'
-        elif len(condition) == 4:
-            cypher = f'match(n:{condition[0]["question_type"]})-[*2]-(answer:Title) where n.name contains "{condition[0]["question"]}" with answer match (answer)-[*2]-(s:{condition[1]["question_type"]}) where s.name contains "{condition[1]["question"]}" with answer match (answer)-[*2]-(c:{condition[2]["question_type"]}) where c.name contains "{condition[2]["question"]}" with answer match (answer)-[*2]-(d:{condition[3]["question_type"]}) where d.name contains "{condition[3]["question"]}" return answer,id(answer)'
-        return cypher
-
-    def execute_jieba_analysis(self, question: str) -> []:
+    def execute_neo4j_query(self, question: str) -> []:
         """输入条件列表 输出查询到的文件ID列表"""
+        id_list = self.search_by_jieba(question)
+        if not id_list:
+            id_list = self.search_by_paddle(question)
+        return id_list
+
+    def search_by_paddle(self, question: str) -> []:
+        condition = self.get_cypher_condition(question)
+        cypher = self.get_cypher(condition)
+        answer = graph.run(cypher).data()
+        id_list = [i['id(answer)'] for i in answer]
+        return id_list
+
+    def get_cypher_condition(self, question: str) -> []:
+        # 飞剑分词 图数据库查询
         words = pseg.cut(question, use_paddle=True)
         condition = []
         nodes_label = {
@@ -149,8 +153,8 @@ class Neo4jView(APIView):
             "ORG": "org",
             "PER": "person"
         }
-
         for question, flag in words:
+            print(question, flag)
             if flag == 'TIME' and question in ["去年", "今年", "明年",
                                                "上个月", "本月", "下个月",
                                                "上周", "本周", "下周",
@@ -166,11 +170,19 @@ class Neo4jView(APIView):
                 except KeyError as e:
                     # print(e)
                     continue
-        # for循环结束
-        cypher = self.get_cypher(condition)
-        answer = graph.run(cypher).data()
-        id_list = [i['id(answer)'] for i in answer]
-        return id_list
+
+        return condition
+
+    def search_by_jieba(self, question: str) -> []:
+        jieba_words = pseg.cut(question, use_paddle=False)
+        for i, flag in jieba_words:
+            print(question, flag)
+            if flag == "event":
+                print("一个自定义Event", i)
+                queryset = Notice.objects.filter(label__icontains=i)
+                id_list = [i.file_id for i in queryset]
+                return id_list
+        # return None
 
     def execute_date_filter(self, question: str) -> []:
         start_date, end_date = str_date_range(question)
@@ -196,3 +208,15 @@ class Neo4jView(APIView):
         if len(result) > 100:
             result = result[:100] + "……"
         return result
+
+    def get_cypher(self, condition: []) -> str:
+        cypher = ""
+        if len(condition) == 1:
+            cypher = f'match(n:{condition[0]["question_type"]})-[*2]-(answer:Title) where n.name contains "{condition[0]["question"]}" return answer,id(answer)'
+        elif len(condition) == 2:
+            cypher = f'match(n:{condition[0]["question_type"]})-[*2]-(answer:Title) where n.name contains "{condition[0]["question"]}" with answer match (answer)-[*2]-(s:{condition[1]["question_type"]}) where s.name contains "{condition[1]["question"]}" return answer,id(answer)'
+        elif len(condition) == 3:
+            cypher = f'match(n:{condition[0]["question_type"]})-[*2]-(answer:Title) where n.name contains "{condition[0]["question"]}" with answer match (answer)-[*2]-(s:{condition[1]["question_type"]}) where s.name contains "{condition[1]["question"]}" with answer match (answer)-[*2]-(c:{condition[2]["question_type"]}) where c.name contains "{condition[2]["question"]}" return answer,id(answer)'
+        elif len(condition) == 4:
+            cypher = f'match(n:{condition[0]["question_type"]})-[*2]-(answer:Title) where n.name contains "{condition[0]["question"]}" with answer match (answer)-[*2]-(s:{condition[1]["question_type"]}) where s.name contains "{condition[1]["question"]}" with answer match (answer)-[*2]-(c:{condition[2]["question_type"]}) where c.name contains "{condition[2]["question"]}" with answer match (answer)-[*2]-(d:{condition[3]["question_type"]}) where d.name contains "{condition[3]["question"]}" return answer,id(answer)'
+        return cypher
