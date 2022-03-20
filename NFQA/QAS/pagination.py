@@ -16,7 +16,7 @@ class FileListPagination(PageNumberPagination):
 
 class NoticePagination(PageNumberPagination):
     # 默认每页显示的数据条数
-    page_size = 3
+    page_size = 100
     # 获取URL参数中设置的每页显示数据条数
     page_size_query_param = 'page_size'
 

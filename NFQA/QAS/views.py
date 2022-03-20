@@ -148,11 +148,29 @@ class Neo4jView(APIView):
         return id_list
 
     def search_by_paddle(self, question: str) -> []:
+        id_list = self.search_by_date(question)
+        if id_list:
+            return id_list
         condition = self.get_cypher_condition(question)
         cypher = self.get_cypher(condition)
         print("Cypher", cypher)
         answer = graph.run(cypher).data()
         id_list = [i['id(answer)'] for i in answer]
+        return id_list
+
+    def search_by_date(self, question: str) -> []:
+        words = pseg.cut(question, use_paddle=True)
+        print("时间识别开始")
+        id_list = []
+        for question, flag in words:
+            print(question, flag)
+            if flag == 'TIME' and question in ["去年", "今年", "明年",
+                                               "上个月", "本月", "下个月",
+                                               "上周", "本周", "下周",
+                                               "昨天", "今天", "明天"]:
+                print("进入了MySQL的日期范围匹配")
+                id_list = self.execute_date_filter(question=question)
+                break
         return id_list
 
     def get_cypher_condition(self, question: str) -> []:
@@ -168,22 +186,11 @@ class Neo4jView(APIView):
         print("Paddle识别开始")
         for question, flag in words:
             print(question, flag)
-            if flag == 'TIME' and question in ["去年", "今年", "明年",
-                                               "上个月", "本月", "下个月",
-                                               "上周", "本周", "下周",
-                                               "昨天", "今天", "明天"]:
-
-                print("进入了MySQL的日期范围匹配")
-                id_list = self.execute_date_filter(question=question)
-                return id_list
-
-            else:
-                try:
-                    condition.append({'question_type': nodes_label[flag], 'question': question})
-                except KeyError as e:
-                    print("KeyError", e)
-                    continue
-
+            try:
+                condition.append({'question_type': nodes_label[flag], 'question': question})
+            except KeyError as e:
+                print("KeyError", e)
+                continue
         return condition
 
     def search_by_jieba(self, question: str) -> []:
@@ -201,7 +208,9 @@ class Neo4jView(APIView):
         start_date, end_date = str_date_range(question)
         notices = Notice.objects.all()
         notice_filter = NoticeFilterBackend()
+        print('strart', start_date, end_date)
         id_list = notice_filter.date_filter(notices, start_date=start_date, end_date=end_date)
+        print("时间过滤器", id_list)
         return id_list
 
     def baidu_search(self, word="信息管理与信息系统"):
