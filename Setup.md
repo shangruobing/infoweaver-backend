@@ -7,20 +7,20 @@
 | 时间      | 版本 | 作者   | 备注           |
 | --------- | ---- | ------ | -------------- |
 | 2022.3.18 | V1.0 | 尚若冰 | 编写第一版文档 |
-| 2022.3.18 | V1.2 | 尚若冰 | 修改了文档结构 |
-| 2022.3.18 | V1.5 | 尚若冰 | 订正部分错误   |
+| 2022.3.20 | V1.2 | 尚若冰 | 修改了文档结构 |
+| 2022.3.22 | V1.5 | 尚若冰 | 订正部分错误   |
 
 ## 目录
 [TOC]
 
 ## 文件清单
 
-| 文件名称              | 作用                                      |
-| --------------------- | ----------------------------------------- |
-| graph-dbms-neo4j.dump | neo4j的数据文件，结点16997个，关系23601个 |
-| mydict.txt            | jieba的自定义字典                         |
-| qas_notice.sql        | mysql的通知表插值语句                     |
-| Word.zip              | word文件合集，有1K个左右的通知文件        |
+| 文件名称              | 作用                               | 备注                             |
+| --------------------- | ---------------------------------- | -------------------------------- |
+| graph-dbms-neo4j.dump | neo4j的数据文件                    |                                  |
+| ~~mydict.txt~~        | jieba的自定义字典                  | ***已上传至Gitee,无需手动安装*** |
+| qas_notice.sql        | mysql的通知表插值语句              |                                  |
+| Word.zip              | word文件合集，有1K个左右的通知文件 |                                  |
 
 
 
@@ -31,7 +31,7 @@
 - 前端:Vue3 Element-Plus Vite Vue-Router
 - 后端:Django Django-Rest-Framework
 - 数据库:MySQL Neo4j(Graph Database）
-- 文件资源:自定义jieba词库 Word文件
+- 文件资源:自定义词典 Word文件
 
 
 
@@ -124,13 +124,11 @@ Neo4j的数据文件为:graph-dbms-neo4j.dump *详见文件清单*
        raise APIException("Neo4j graph database connection failed")
    ```
 
-9. 安装自定义jieba字典，字典数据文件为：myDict.txt,放置在后端项目/public/下即可
+9. 使用下述命令启动Django，出现下图结果，代表Django成功启动，至此Django安装完成，恭喜🎉
 
-10. 使用下述命令启动Django，出现下图结果，代表Django成功启动，至此Django安装完成，恭喜🎉
-
-    ```shell
-    python manage.py runserver
-    ```
+   ```shell
+   python manage.py runserver
+   ```
 
 <img src="C:/Users/%E5%86%B0/AppData/Roaming/Typora/typora-user-images/image-20220318165749490.png" alt="image-20220318165749490" style="zoom:50%;" />
 
@@ -229,7 +227,7 @@ MySQL的数据文件为:qas_notice.sql *详见文件清单*
 
 ## 目前存在的问题
 
-- [ ] 部分电脑，百度Paddle模型安装不上，会导致jieba的语义识别出问题
+- [x] 部分电脑，百度Paddle模型无法运行，从而会导致jieba的语义识别出问题
 
   参数如下:paddlepaddle-tiny==1.6.1
 
@@ -242,5 +240,5 @@ MySQL的数据文件为:qas_notice.sql *详见文件清单*
   [operator < load > error]
   ```
   
-  
+  解决办法:用管理员模式执行Django的启动脚本
 
