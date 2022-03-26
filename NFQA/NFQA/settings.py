@@ -12,23 +12,15 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 
 from pathlib import Path
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
-import django_filters.rest_framework
-
+# import django_filters.rest_framework
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
-
-# SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'django-insecure-k+@gtqz^w72bt^-(mpd7d%j^_8b7@0wg7hq9!=l(y^+wwws=sh'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
 ALLOWED_HOSTS = ["*"]
-
-# Application definition
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -75,32 +67,21 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'NFQA.wsgi.application'
 
-# Database
-# https://docs.djangoproject.com/en/3.2/ref/settings/#databases
-
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.sqlite3',
-#         'NAME': BASE_DIR / 'db.sqlite3',
-#     }
-# }
-
 DATABASES = {
     'default':
         {
-            'ENGINE': 'django.db.backends.mysql',  # 数据库引擎
-            'NAME': 'NFQA',  # 数据库名称
-            'HOST': '127.0.0.1',  # 数据库地址，本机 ip 地址 127.0.0.1
-            'PORT': 3306,  # 端口
-            'USER': 'root',  # 数据库用户名
-            'PASSWORD': '010209',  # 数据库密码
+            'ENGINE': 'django.db.backends.mysql',
+            'NAME': 'NFQA',
+            'HOST': '127.0.0.1',
+            'PORT': 3306,
+            'USER': 'root',  # 数据库用户名 需要更改！
+            'PASSWORD': '010209',  # 数据库密码 需要更改！
         },
     'neo4j':
         {
-            'ENGINE': 'Neo4j',
             'HOST': "http://localhost:7474",
-            "USER": "neo4j",
-            "PASSWORD": '010209',
+            "USER": "neo4j",  # 图数据库用户名 需要更改！
+            "PASSWORD": '010209',  # 图数据库密码 需要更改！
         }
 }
 
@@ -119,12 +100,8 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-# Internationalization
-# https://docs.djangoproject.com/en/3.2/topics/i18n/
-
 LANGUAGE_CODE = 'en-us'
 
-# TIME_ZONE = 'UTC'
 TIME_ZONE = 'Asia/Shanghai'
 USE_I18N = True
 
@@ -132,12 +109,6 @@ USE_L10N = True
 
 USE_TZ = False
 
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/3.2/howto/static-files/
-
 STATIC_URL = '/static/'
-
-# Default primary key field type
-# https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'

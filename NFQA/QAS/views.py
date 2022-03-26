@@ -12,7 +12,8 @@ import re
 import requests
 from bs4 import BeautifulSoup
 from rest_framework import status
-from .classes import Question, graph
+from .classes.question import Question
+from .classes.query import graph
 
 
 class HomeView(APIView):
@@ -103,7 +104,7 @@ class Neo4jView(APIView):
         print("question:", question)
 
         question_object = Question(question)
-        notices = question_object.init_query_function()
+        notices = question_object.get_query_results()
 
         serializer = NoticeSerializer(notices, many=True, context={'request': request})
         if len(serializer.data) == 0:
