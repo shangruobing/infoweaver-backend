@@ -38,9 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'corsheaders',
-    # 'django_filters',
     'rest_framework',
-    # 'django_filters',
     'QAS'
 ]
 
@@ -96,10 +94,15 @@ DATABASES = {
             'PORT': 3306,  # 端口
             'USER': 'root',  # 数据库用户名
             'PASSWORD': '010209',  # 数据库密码
+        },
+    'neo4j':
+        {
+            'ENGINE': 'Neo4j',
+            'HOST': "http://localhost:7474",
+            "USER": "neo4j",
+            "PASSWORD": '010209',
         }
 }
-# Password validation
-# https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -138,7 +141,3 @@ STATIC_URL = '/static/'
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
-# REST_FRAMEWORK = {
-#     'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend']
-# }
