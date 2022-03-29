@@ -19,12 +19,13 @@ class Question:
         return f"Question:{self.question}"
 
     def get_query_results(self):
-        dictResult = difflib.get_close_matches(self.question, myDict, 1, cutoff=0.8)
-        if dictResult:
-            print("根据自定义字典查询MySQL")
-            notices = Notice.objects.filter(name__icontains=dictResult[0][:-5])
+        matched_result = difflib.get_close_matches(self.question, myDict, 1, cutoff=0.8)
+        if matched_result:
+            print("根据进行文件名字典匹配")
+            print("文件名字典", matched_result)
+            notices = Notice.objects.filter(name__icontains=matched_result[0][:-5])
         else:
-            print("自定义字典查询失败 进行Neo4j查询")
+            print("文件名字典匹配失败 进行数据库查询")
             id_list = self.execute_query(self.question)
             notices = Notice.objects.filter(file_id__in=id_list)
 

@@ -14,11 +14,22 @@ from bs4 import BeautifulSoup
 from rest_framework import status
 from .classes.question import Question
 from .classes.query import graph
+from django.core.files.storage import default_storage
+from django.core.files.base import ContentFile
 
 
 class HomeView(APIView):
     def get(self, request, *args, **kwargs):
         return Response("Welcome Notice File Question & Answer System !", status=status.HTTP_200_OK)
+
+    def post(self, request, *args, **kwargs):
+        """上传文件"""
+        try:
+            file = request.FILES.get('file')
+            default_storage.save(rf"./upload/{file.name}", content=ContentFile(file.read()))
+            return Response(f'{file.name} upload OK')
+        except AttributeError:
+            return Response('upload ERROR', status=status.HTTP_400_BAD_REQUEST)
 
 
 class NoticeListView(APIView):

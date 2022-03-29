@@ -8,7 +8,6 @@ from QAS.utils.str2date_range import str_date_range
 import jieba
 from django.conf import settings
 from py2neo import Graph
-from rest_framework import status
 from rest_framework.exceptions import APIException
 from .cypher import Cypher
 
@@ -23,7 +22,9 @@ try:
     graph = Graph(config.get("HOST"), auth=(config.get("USER"), config.get("PASSWORD")))
     print("Neo4j graph database connected successfully")
 except py2neo.errors.ConnectionUnavailable:
-    raise APIException("Neo4j graph database connection failed", code=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    # raise APIException("Neo4j graph database connection failed")
+    graph = None
+    print("Neo4j graph database connection failed")
 
 
 class Query(ABC):
@@ -33,6 +34,11 @@ class Query(ABC):
     @abc.abstractmethod
     def execute_query(self) -> []:
         pass
+
+    def __str__(self):
+        return f"The query's question:{self.question}"
+
+    __repr__ = __str__
 
 
 class JiebaQuery(Query):
