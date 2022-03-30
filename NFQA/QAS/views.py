@@ -16,6 +16,13 @@ from .classes.question import Question
 from .classes.query import graph
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
+from .classes.pretrain_model import BertModel
+
+try:
+    model = BertModel()
+    print("BERT model loaded successfully")
+except Exception:
+    print("BERT model load failed")
 
 
 class HomeView(APIView):
@@ -148,3 +155,21 @@ class Neo4jView(APIView):
         if len(result) > 100:
             result = result[:100] + "……"
         return result
+
+    def put(self, request, *args, **kwargs):
+        """根据file_id查询文件内容 并输入BERT
+        2k字15s
+        500字需要2-3s
+        100字0.3s"""
+        try:
+            question = request.data['question']
+            file_id = request.data['id']
+            cypher = f"match (title)-[]-(context:File) where id(title)={file_id} return context.name"
+
+            context = graph.run(cypher).data()[0].get("context.name", "")
+            context = ''.join(context[:100].split()).strip()
+
+            results = model.fit(question, context)
+            return Response(results)
+        except Exception:
+            return Response('ERROR', status=status.HTTP_400_BAD_REQUEST)
