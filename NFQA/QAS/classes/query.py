@@ -4,7 +4,7 @@ import jieba.posseg as pseg
 import py2neo
 from QAS.filters import NoticeFilterBackend
 from QAS.models import Notice
-from QAS.utils.str2date_range import str_date_range
+from QAS.utils.str2date import str_date_range
 import jieba
 from django.conf import settings
 from py2neo import Graph

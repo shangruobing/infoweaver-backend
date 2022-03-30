@@ -1,21 +1,29 @@
-from rest_framework.exceptions import NotFound
-from rest_framework.response import Response
-from rest_framework.views import APIView
-from .models import Notice
 import os
-from django.http import FileResponse
-from .serializers import NoticeSerializer
-from .pagination import FileListPagination, NoticePagination
-from .filters import NoticeFilterBackend
 import time
-import re
-import requests
-from bs4 import BeautifulSoup
-from rest_framework import status
-from .classes.question import Question
-from .classes.query import graph
-from django.core.files.storage import default_storage
+
+from django.http import FileResponse
 from django.core.files.base import ContentFile
+from django.core.files.storage import default_storage
+
+from rest_framework import status
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework.exceptions import NotFound
+
+from .models import Notice
+from .classes.query import graph
+from .classes.question import Question
+from .filters import NoticeFilterBackend
+from .serializers import NoticeSerializer
+from .utils.baidu_search import baidu_search
+from .classes.pretrained_model import BertModel
+from .pagination import FileListPagination, NoticePagination
+
+try:
+    model = BertModel()
+    print("BERT model loaded successfully")
+except RuntimeError:
+    print("BERT model load failed")
 
 
 class HomeView(APIView):
@@ -120,31 +128,30 @@ class Neo4jView(APIView):
         serializer = NoticeSerializer(notices, many=True, context={'request': request})
         if len(serializer.data) == 0:
             print("Neo4查询失败 百度百科查询")
-            return Response(self.baidu_search(question))
+            return Response(baidu_search(question))
 
         paginator = NoticePagination()
         page_user_list = paginator.paginate_queryset(serializer.data, self.request, view=self)
         return paginator.get_paginated_response(page_user_list)
 
-    def baidu_search(self, word: str) -> str:
+    def put(self, request, *args, **kwargs):
         """
-        百度百科检索问题
-        :param word: 需要查询的问题
-        :return: 百度百科查询结果
+        根据file_id查询文件内容 并输入BERT取得结果
+        试验阶段只能通过postman测试
+        性能捉急!!!
+        2k字     15s
+        500字    2-3s
+        100字    0.3s
         """
-        headers = {
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/98.0.4758.102 Safari/537.36 Edg/98.0.1108.62"
-        }
+        try:
+            question = request.data['question']
+            file_id = request.data['id']
+            cypher = f"match (title)-[]-(context:File) where id(title)={file_id} return context.name"
 
-        url = f'https://baike.baidu.com/item/{word}'
-        response = requests.get(url=url, headers=headers, timeout=10)
-        html_content = response.text
-        soup = BeautifulSoup(html_content, 'lxml')
+            context = graph.run(cypher).data()[0].get("context.name", "")
+            context = ''.join(context[:100].split()).strip()
 
-        li_list = soup.select('.lemma-summary')
-
-        results = [re.sub(r'\[[0-9 \-]+]', '', i.text).strip() for i in li_list]
-        result = ''.join(results)
-        if len(result) > 100:
-            result = result[:100] + "……"
-        return result
+            results = model.fit(question, context)
+            return Response(results)
+        except Exception:
+            return Response('ERROR', status=status.HTTP_400_BAD_REQUEST)
