@@ -1,5 +1,5 @@
-import jieba.posseg as pseg
 import jieba
+import jieba.posseg as pseg
 from rest_framework.exceptions import APIException
 
 try:

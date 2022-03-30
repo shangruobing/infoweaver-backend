@@ -1,6 +1,8 @@
-from QAS.models import Notice
-from rest_framework.exceptions import APIException
 import difflib
+
+from rest_framework.exceptions import APIException
+
+from QAS.models import Notice
 from .query import JiebaQuery, PaddleQuery
 
 try:

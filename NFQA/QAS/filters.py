@@ -1,6 +1,7 @@
 import time
-from rest_framework import filters
 from datetime import datetime
+
+from rest_framework import filters
 
 
 class NoticeFilterBackend(filters.BaseFilterBackend):

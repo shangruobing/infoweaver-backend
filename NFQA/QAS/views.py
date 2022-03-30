@@ -17,6 +17,7 @@ from .filters import NoticeFilterBackend
 from .serializers import NoticeSerializer
 from .utils.baidu_search import baidu_search
 from .classes.pretrained_model import BertModel
+from .utils.bert_thread import MultithreadingBert
 from .pagination import FileListPagination, NoticePagination
 
 try:
@@ -146,12 +147,18 @@ class Neo4jView(APIView):
         try:
             question = request.data['question']
             file_id = request.data['id']
+
+            number = int(request.data['thread'])
+
             cypher = f"match (title)-[]-(context:File) where id(title)={file_id} return context.name"
 
             context = graph.run(cypher).data()[0].get("context.name", "")
-            context = ''.join(context[:100].split()).strip()
+            context = ''.join(context.split()).strip()
+            if number > 1:
+                results = MultithreadingBert(model, question, context, number).run_threads()
+            else:
+                results = model.fit(question, context)
 
-            results = model.fit(question, context)
             return Response(results)
-        except Exception:
-            return Response('ERROR', status=status.HTTP_400_BAD_REQUEST)
+        except (IndexError, KeyError):
+            return Response('ERROR!', status=status.HTTP_400_BAD_REQUEST)

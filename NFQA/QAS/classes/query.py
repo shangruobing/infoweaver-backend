@@ -1,15 +1,17 @@
 import abc
 from abc import ABC
-import jieba.posseg as pseg
-import py2neo
-from QAS.filters import NoticeFilterBackend
-from QAS.models import Notice
-from QAS.utils.str2date import str_date_range
+
 import jieba
-from django.conf import settings
+import py2neo
 from py2neo import Graph
+import jieba.posseg as pseg
+from django.conf import settings
 from rest_framework.exceptions import APIException
+
 from .cypher import Cypher
+from QAS.models import Notice
+from QAS.filters import NoticeFilterBackend
+from QAS.utils.str2date import str_date_range
 
 try:
     jieba.load_userdict(r'..\public\dictionary.txt')
