@@ -26,6 +26,8 @@ class Question:
             print("根据进行文件名字典匹配")
             print("文件名字典", matched_result)
             notices = Notice.objects.filter(name__icontains=matched_result[0][:-5])
+            print("文件名", matched_result[0][:-5])
+            print("文件查询结果", notices)
         else:
             print("文件名字典匹配失败 进行数据库查询")
             id_list = self.execute_query(self.question)

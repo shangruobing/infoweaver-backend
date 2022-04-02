@@ -4,6 +4,7 @@ import time
 from django.http import FileResponse
 from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
+from py2neo import Node, Relationship, Subgraph
 
 from rest_framework import status
 from rest_framework.views import APIView
@@ -17,14 +18,33 @@ from .filters import NoticeFilterBackend
 from .serializers import NoticeSerializer
 from .utils.baidu_search import baidu_search
 from .classes.pretrained_model import BertModel
-from .utils.bert_thread import MultithreadingBert
+from .utils.threads import MultithreadingBert
 from .pagination import FileListPagination, NoticePagination
+from .utils.state import is_have_history
 
 try:
     model = BertModel()
     print("BERT model loaded successfully")
 except RuntimeError:
     print("BERT model load failed")
+
+
+class TestView(APIView):
+    def get(self, request, *args, **kwargs):
+        return Response("Welcome Notice File Question & Answer System !", status=status.HTTP_200_OK)
+
+    def post(self, request, *args, **kwargs):
+        """测试多轮对话
+        1:代表具有历史信息
+        """
+
+        state, history = is_have_history(request)
+        print(state)
+        if state:
+            print(history)
+            return Response(f"History:{history}", status=status.HTTP_200_OK)
+        else:
+            return Response("No History", status=status.HTTP_200_OK)
 
 
 class HomeView(APIView):
@@ -34,6 +54,24 @@ class HomeView(APIView):
     def post(self, request, *args, **kwargs):
         """上传文件"""
         try:
+            # Title = Node("Title", name=request.data["name"])
+            # Time = Node("Time", name="Time" + request.data["name"])
+            # time = Node("time", name=request.data["data2"])
+            # Loc = Node("Location", name="Loc" + request.data["name"])
+            # location = Node("location", name=request.data["region"])
+            #
+            # relation1 = Relationship(Title, "has_time", Time)
+            # relation2 = Relationship(Title, "has_location", Loc)
+            # relation3 = Relationship(Time, "has_Time", time)
+            # relation4 = Relationship(Loc, "location", location)
+            #
+            # node_ls = [Title, Time, Loc, time, location]
+            # relation_ls = [relation1, relation2, relation3, relation4]
+            # subgraph = Subgraph(node_ls, relation_ls)
+            # tx = graph.begin()
+            # tx.create(subgraph)
+            # graph.commit(tx)
+
             file = request.FILES.get('file')
             default_storage.save(rf"./upload/{file.name}", content=ContentFile(file.read()))
             return Response(f'{file.name} upload OK')
@@ -121,15 +159,38 @@ class Neo4jView(APIView):
         通过文件名匹配->Neo4j->百度百科的顺序依次进行查询
         """
         question = request.data['question']
-        print("question:", question)
+        count = int(request.data.get("count", 0))
 
-        question_object = Question(question)
-        notices = question_object.get_query_results()
+        print("request", request.data)
+        state, history = is_have_history(request)
+
+        if state:
+            print("history", history)
+            file_id = history.get('file_id', '')
+            if count == 2:
+                # file_id = history.get('context', '').get('file_id', '')
+                notices = Notice.objects.filter(file_id=file_id)
+
+            if 2 < count < 5:
+                print("进入BERT阶段")
+                # file_id = history.get('context', '').get('file_id', '')
+                cypher = f"match (title)-[]-(context:File) where id(title)={file_id} return context.name"
+                context = graph.run(cypher).data()[0].get("context.name", "")
+                context = ''.join(context.split()).strip()
+                result = model.fit(question, context)
+                print("模型结果", result)
+                return Response({"results": result.get("answer", '')})
+
+        else:
+            question_object = Question(question)
+            notices = question_object.get_query_results()
 
         serializer = NoticeSerializer(notices, many=True, context={'request': request})
         if len(serializer.data) == 0:
             print("Neo4查询失败 百度百科查询")
-            return Response(baidu_search(question))
+            # 修改为和分页一致
+            # return Response(baidu_search(question))
+            return Response({"results": baidu_search(question)})
 
         paginator = NoticePagination()
         page_user_list = paginator.paginate_queryset(serializer.data, self.request, view=self)
@@ -148,17 +209,17 @@ class Neo4jView(APIView):
             question = request.data['question']
             file_id = request.data['id']
 
-            number = int(request.data['thread'])
+            thread_number = int(request.data['thread'])
 
             cypher = f"match (title)-[]-(context:File) where id(title)={file_id} return context.name"
 
             context = graph.run(cypher).data()[0].get("context.name", "")
             context = ''.join(context.split()).strip()
-            if number > 1:
-                results = MultithreadingBert(model, question, context, number).run_threads()
+            if thread_number > 1:
+                result = MultithreadingBert(model, question, context, thread_number).run_threads()
             else:
-                results = model.fit(question, context)
+                result = model.fit(question, context)
 
-            return Response(results)
+            return Response(result)
         except (IndexError, KeyError):
             return Response('ERROR!', status=status.HTTP_400_BAD_REQUEST)
