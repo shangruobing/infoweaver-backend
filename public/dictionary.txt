@@ -2,3 +2,4 @@
 四六级 event
 团日活动 event
 三好学生 event
+选课 event

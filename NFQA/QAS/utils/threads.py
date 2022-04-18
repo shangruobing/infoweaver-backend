@@ -45,7 +45,7 @@ class MultithreadingBert:
     def execute_function(self, context):
         return self.model.fit(self.question, context)
 
-    def evaluate_result(self, results):
+    def evaluate_result(self, results) -> str:
         return max(results, key=lambda x: x['score']).get('answer')
 
     def split_context(self):

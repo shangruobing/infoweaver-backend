@@ -159,27 +159,16 @@ class Neo4jView(APIView):
         通过文件名匹配->Neo4j->百度百科的顺序依次进行查询
         """
         question = request.data['question']
-        count = int(request.data.get("count", 0))
-
         print("request", request.data)
         state, history = is_have_history(request)
 
         if state:
-            print("history", history)
             file_id = history.get('file_id', '')
-            if count == 2:
-                # file_id = history.get('context', '').get('file_id', '')
-                notices = Notice.objects.filter(file_id=file_id)
-
-            if 2 < count < 5:
-                print("进入BERT阶段")
-                # file_id = history.get('context', '').get('file_id', '')
-                cypher = f"match (title)-[]-(context:File) where id(title)={file_id} return context.name"
-                context = graph.run(cypher).data()[0].get("context.name", "")
-                context = ''.join(context.split()).strip()
-                result = model.fit(question, context)
-                print("模型结果", result)
-                return Response({"results": result.get("answer", '')})
+            cypher = f"match (title)-[]-(context:File) where id(title)={file_id} return context.name"
+            context = graph.run(cypher).data()[0].get("context.name", "")
+            context = ''.join(context.split()).strip()
+            result = MultithreadingBert(model, question, context, thread_number=8).run_threads()
+            return Response({"results": result})
 
         else:
             question_object = Question(question)
@@ -187,9 +176,7 @@ class Neo4jView(APIView):
 
         serializer = NoticeSerializer(notices, many=True, context={'request': request})
         if len(serializer.data) == 0:
-            print("Neo4查询失败 百度百科查询")
-            # 修改为和分页一致
-            # return Response(baidu_search(question))
+            # print("Neo4查询失败 百度百科查询")
             return Response({"results": baidu_search(question)})
 
         paginator = NoticePagination()
