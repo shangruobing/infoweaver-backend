@@ -39,7 +39,7 @@ class Doc2docx(FileConvertor):
                 doc.SaveAs(docxName, 16)
                 doc.Close()
             except Exception:
-                print(docName, " ERROR!")
+                print(file, " ERROR!")
                 continue
         w.Quit()
         print("Finished!")

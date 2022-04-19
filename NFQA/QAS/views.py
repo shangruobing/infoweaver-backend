@@ -2,10 +2,10 @@ import os
 import time
 import shutil
 
+from django.conf import settings
 from django.http import FileResponse
 from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
-from py2neo import Node, Relationship, Subgraph
 
 from rest_framework import status
 from rest_framework.views import APIView
@@ -16,20 +16,18 @@ from .models import Notice, UploadFile
 from .classes.query import graph
 from .classes.question import Question
 from .filters import NoticeFilterBackend
-from .serializers import NoticeSerializer, UploadFileSerializer
-from .utils.baidu_search import baidu_search
-from .classes.pretrained_model import BertModel
-from .utils.threads import MultithreadingBert
-from .pagination import FileListPagination, NoticePagination, UploadFileInformationPagination
-from .utils.state import is_have_history
-from django.conf import settings
-from .models import UploadFile
 from .classes.file_convertor import Docx2txt
-from .classes.Neo4jDataLoader import txt2neo4j
+from .utils.state import is_have_history
+from .utils.baidu_search import baidu_search
+from .utils.threads import MultithreadingBert
+from .classes.pretrained_model import BertModel
+from .classes.Neo4jDataLoader import Neo4jDataLoader
+from .serializers import NoticeSerializer, UploadFileSerializer
+from .pagination import FileListPagination, NoticePagination, UploadFilePagination
 
 try:
-    # model = BertModel()
-    model = None
+    model = BertModel()
+    # model = None
     print("BERT model loaded successfully")
 except RuntimeError:
     print("BERT model load failed")
@@ -170,30 +168,11 @@ class Neo4jView(APIView):
             return Response('ERROR!', status=status.HTTP_400_BAD_REQUEST)
 
 
-# class UploadFileView(APIView):
-#
-#     def post(self, request, *args, **kwargs):
-#         try:
-#             file = request.FILES.get('file')
-#             username = request.data.get("username")
-#             file_name = file.name
-#             data = {
-#                 "file_name": file_name,
-#                 "username": username
-#             }
-#             serializer = UploadFileSerializer(data=data)
-#             if serializer.is_valid():
-#                 serializer.save()
-#             default_storage.save(f"{settings.MEDIA_ROOT}/upload/{file.name}", content=ContentFile(file.read()))
-#             return Response(f'{file.name} upload OK')
-#         except AttributeError:
-#             return Response('Upload ERROR', status=status.HTTP_400_BAD_REQUEST)
-
 class UploadFileListView(APIView):
     def get(self, request, *args, **kwargs):
         files = UploadFile.objects.all()
         file_serializer = UploadFileSerializer(files, many=True)
-        paginator = UploadFileInformationPagination()
+        paginator = UploadFilePagination()
         page_user_list = paginator.paginate_queryset(file_serializer.data, self.request, view=self)
         return paginator.get_paginated_response(page_user_list)
 
@@ -215,20 +194,19 @@ class UploadFileListView(APIView):
             return Response('Upload ERROR', status=status.HTTP_400_BAD_REQUEST)
 
     def options(self, request, *args, **kwargs):
-        # TODO
 
-        # file_path = settings.MEDIA_ROOT + "/upload/"
-        # target_path = settings.MEDIA_ROOT + "/temp/docx/"
-        # self.move_files(file_path, target_path)
-        #
-        # convertor = Docx2txt(target_path, settings.MEDIA_ROOT + "/temp/txt/")
-        # convertor.execute_file_convert()
-        # txt2neo4j(settings.MEDIA_ROOT + "/temp/txt/")
-        # self.clear_table()
+        file_path = settings.MEDIA_ROOT + "/upload/"
+        target_path = settings.MEDIA_ROOT + "/temp/docx/"
+        self.move_files(file_path, target_path)
+
+        txt_path = settings.MEDIA_ROOT + "/temp/txt/"
+        Docx2txt(target_path, txt_path).execute_file_convert()
+        Neo4jDataLoader(txt_path).execute_load()
+        self.clear_table()
 
         shutil.rmtree(settings.MEDIA_ROOT + "/upload/", True)
-        # os.removedirs(settings.MEDIA_ROOT + "/upload/")
-        return Response("正在制作")
+        os.mkdir(settings.MEDIA_ROOT + "/upload/")
+        return Response("Testing...")
 
     @staticmethod
     def clear_table():
