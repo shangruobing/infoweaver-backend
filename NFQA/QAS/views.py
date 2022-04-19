@@ -24,6 +24,8 @@ from .pagination import FileListPagination, NoticePagination, UploadFileInformat
 from .utils.state import is_have_history
 from django.conf import settings
 from .models import UploadFile
+from .classes.file_convertor import Docx2txt
+from .classes.Neo4jDataLoader import txt2neo4j
 
 try:
     # model = BertModel()
@@ -187,7 +189,6 @@ class Neo4jView(APIView):
 #         except AttributeError:
 #             return Response('Upload ERROR', status=status.HTTP_400_BAD_REQUEST)
 
-
 class UploadFileListView(APIView):
     def get(self, request, *args, **kwargs):
         files = UploadFile.objects.all()
@@ -215,35 +216,28 @@ class UploadFileListView(APIView):
 
     def options(self, request, *args, **kwargs):
         # TODO
+
+        # file_path = settings.MEDIA_ROOT + "/upload/"
+        # target_path = settings.MEDIA_ROOT + "/temp/docx/"
+        # self.move_files(file_path, target_path)
+        #
+        # convertor = Docx2txt(target_path, settings.MEDIA_ROOT + "/temp/txt/")
+        # convertor.execute_file_convert()
+        # txt2neo4j(settings.MEDIA_ROOT + "/temp/txt/")
         # self.clear_table()
 
-        path_main = r"C:\Users\e2164\Desktop\待处理文件夹"  # 待处理文件夹路径
-        filelist_main = os.listdir(path_main)  # 将“待处理文件夹“下的文件名以列表的形式列出来
-
-        path_receive = r"C:\Users\e2164\Desktop\接受文件夹"
-
-        for FILE in filelist_main:  # 遍历“待处理文件夹“下的每个文件
-            path_son = r"C:\Users\e2164\Desktop\待处理文件夹/" + FILE  # 获取子文件夹路径
-            filelist_son = os.listdir(path_son)  # 将子文件夹下的文件以列表形式列出来
-
-            for files in filelist_son:
-
-                filename1 = os.path.splitext(files)[1]  # 读取文件后缀名
-                filename0 = os.path.splitext(files)[0]  # 读取文件名
-
-                if filename1 == '.pdf':  # 判断是否为pdf文件
-
-                    full_path = os.path.join(path_son, files)  # pdf文件待移动完整路径
-                    despath = path_receive + '\\' + filename0 + '.pdf'  # pdf文件目标完整路径
-                    shutil.move(full_path, despath)
-
-                else:  # 以防万一 如果里面没有pdf
-                    continue
+        shutil.rmtree(settings.MEDIA_ROOT + "/upload/", True)
+        # os.removedirs(settings.MEDIA_ROOT + "/upload/")
         return Response("正在制作")
 
     @staticmethod
     def clear_table():
         UploadFile.objects.all().delete()
+
+    def move_files(self, file_path, target_path):
+        file_list = os.listdir(file_path)
+        for file in file_list:
+            shutil.move(file_path + file, target_path)
 
 
 class UploadFileView(APIView):
