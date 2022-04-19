@@ -1,5 +1,6 @@
 import os
 import time
+import shutil
 
 from django.http import FileResponse
 from django.core.files.base import ContentFile
@@ -11,19 +12,22 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.exceptions import NotFound
 
-from .models import Notice
+from .models import Notice, UploadFile
 from .classes.query import graph
 from .classes.question import Question
 from .filters import NoticeFilterBackend
-from .serializers import NoticeSerializer
+from .serializers import NoticeSerializer, UploadFileSerializer
 from .utils.baidu_search import baidu_search
 from .classes.pretrained_model import BertModel
 from .utils.threads import MultithreadingBert
-from .pagination import FileListPagination, NoticePagination
+from .pagination import FileListPagination, NoticePagination, UploadFileInformationPagination
 from .utils.state import is_have_history
+from django.conf import settings
+from .models import UploadFile
 
 try:
-    model = BertModel()
+    # model = BertModel()
+    model = None
     print("BERT model loaded successfully")
 except RuntimeError:
     print("BERT model load failed")
@@ -31,52 +35,12 @@ except RuntimeError:
 
 class TestView(APIView):
     def get(self, request, *args, **kwargs):
-        return Response("Welcome Notice File Question & Answer System !", status=status.HTTP_200_OK)
-
-    def post(self, request, *args, **kwargs):
-        """测试多轮对话
-        1:代表具有历史信息
-        """
-
-        state, history = is_have_history(request)
-        print(state)
-        if state:
-            print(history)
-            return Response(f"History:{history}", status=status.HTTP_200_OK)
-        else:
-            return Response("No History", status=status.HTTP_200_OK)
+        return Response("Welcome Test Page!", status=status.HTTP_200_OK)
 
 
 class HomeView(APIView):
     def get(self, request, *args, **kwargs):
         return Response("Welcome Notice File Question & Answer System !", status=status.HTTP_200_OK)
-
-    def post(self, request, *args, **kwargs):
-        """上传文件"""
-        try:
-            # Title = Node("Title", name=request.data["name"])
-            # Time = Node("Time", name="Time" + request.data["name"])
-            # time = Node("time", name=request.data["data2"])
-            # Loc = Node("Location", name="Loc" + request.data["name"])
-            # location = Node("location", name=request.data["region"])
-            #
-            # relation1 = Relationship(Title, "has_time", Time)
-            # relation2 = Relationship(Title, "has_location", Loc)
-            # relation3 = Relationship(Time, "has_Time", time)
-            # relation4 = Relationship(Loc, "location", location)
-            #
-            # node_ls = [Title, Time, Loc, time, location]
-            # relation_ls = [relation1, relation2, relation3, relation4]
-            # subgraph = Subgraph(node_ls, relation_ls)
-            # tx = graph.begin()
-            # tx.create(subgraph)
-            # graph.commit(tx)
-
-            file = request.FILES.get('file')
-            default_storage.save(rf"./upload/{file.name}", content=ContentFile(file.read()))
-            return Response(f'{file.name} upload OK')
-        except AttributeError:
-            return Response('upload ERROR', status=status.HTTP_400_BAD_REQUEST)
 
 
 class NoticeListView(APIView):
@@ -108,7 +72,7 @@ class NoticeListView(APIView):
             neoFileName.append(i["n"]["name"])
             neoFileId.append(i["id(n)"])
 
-        filePath = r"..\public\Word"  # 文件夹路径
+        filePath = settings.MEDIA_ROOT + "/files/docx/"
 
         for i, file in enumerate(neoFileName):
             try:
@@ -136,7 +100,7 @@ class NoticeView(APIView):
         """
         notices = self.get_object(pk)
         serializer = NoticeSerializer(notices, context={'request': request})
-        file_path = "..\\public\\Word\\" + serializer.data['name']
+        file_path = settings.MEDIA_ROOT + "/files/docx/" + serializer.data['name']
         return FileResponse(open(file_path, 'rb'))
 
 
@@ -176,7 +140,6 @@ class Neo4jView(APIView):
 
         serializer = NoticeSerializer(notices, many=True, context={'request': request})
         if len(serializer.data) == 0:
-            # print("Neo4查询失败 百度百科查询")
             return Response({"results": baidu_search(question)})
 
         paginator = NoticePagination()
@@ -184,14 +147,7 @@ class Neo4jView(APIView):
         return paginator.get_paginated_response(page_user_list)
 
     def put(self, request, *args, **kwargs):
-        """
-        根据file_id查询文件内容 并输入BERT取得结果
-        试验阶段只能通过postman测试
-        性能捉急!!!
-        2k字     15s
-        500字    2-3s
-        100字    0.3s
-        """
+
         try:
             question = request.data['question']
             file_id = request.data['id']
@@ -210,3 +166,102 @@ class Neo4jView(APIView):
             return Response(result)
         except (IndexError, KeyError):
             return Response('ERROR!', status=status.HTTP_400_BAD_REQUEST)
+
+
+# class UploadFileView(APIView):
+#
+#     def post(self, request, *args, **kwargs):
+#         try:
+#             file = request.FILES.get('file')
+#             username = request.data.get("username")
+#             file_name = file.name
+#             data = {
+#                 "file_name": file_name,
+#                 "username": username
+#             }
+#             serializer = UploadFileSerializer(data=data)
+#             if serializer.is_valid():
+#                 serializer.save()
+#             default_storage.save(f"{settings.MEDIA_ROOT}/upload/{file.name}", content=ContentFile(file.read()))
+#             return Response(f'{file.name} upload OK')
+#         except AttributeError:
+#             return Response('Upload ERROR', status=status.HTTP_400_BAD_REQUEST)
+
+
+class UploadFileListView(APIView):
+    def get(self, request, *args, **kwargs):
+        files = UploadFile.objects.all()
+        file_serializer = UploadFileSerializer(files, many=True)
+        paginator = UploadFileInformationPagination()
+        page_user_list = paginator.paginate_queryset(file_serializer.data, self.request, view=self)
+        return paginator.get_paginated_response(page_user_list)
+
+    def post(self, request, *args, **kwargs):
+        try:
+            file = request.FILES.get('file')
+            username = request.data.get("username")
+            file_name = file.name
+            data = {
+                "file_name": file_name,
+                "username": username
+            }
+            serializer = UploadFileSerializer(data=data)
+            if serializer.is_valid():
+                serializer.save()
+            default_storage.save(f"{settings.MEDIA_ROOT}/upload/{file.name}", content=ContentFile(file.read()))
+            return Response(f'{file.name} upload OK')
+        except AttributeError:
+            return Response('Upload ERROR', status=status.HTTP_400_BAD_REQUEST)
+
+    def options(self, request, *args, **kwargs):
+        # TODO
+        # self.clear_table()
+
+        path_main = r"C:\Users\e2164\Desktop\待处理文件夹"  # 待处理文件夹路径
+        filelist_main = os.listdir(path_main)  # 将“待处理文件夹“下的文件名以列表的形式列出来
+
+        path_receive = r"C:\Users\e2164\Desktop\接受文件夹"
+
+        for FILE in filelist_main:  # 遍历“待处理文件夹“下的每个文件
+            path_son = r"C:\Users\e2164\Desktop\待处理文件夹/" + FILE  # 获取子文件夹路径
+            filelist_son = os.listdir(path_son)  # 将子文件夹下的文件以列表形式列出来
+
+            for files in filelist_son:
+
+                filename1 = os.path.splitext(files)[1]  # 读取文件后缀名
+                filename0 = os.path.splitext(files)[0]  # 读取文件名
+
+                if filename1 == '.pdf':  # 判断是否为pdf文件
+
+                    full_path = os.path.join(path_son, files)  # pdf文件待移动完整路径
+                    despath = path_receive + '\\' + filename0 + '.pdf'  # pdf文件目标完整路径
+                    shutil.move(full_path, despath)
+
+                else:  # 以防万一 如果里面没有pdf
+                    continue
+        return Response("正在制作")
+
+    @staticmethod
+    def clear_table():
+        UploadFile.objects.all().delete()
+
+
+class UploadFileView(APIView):
+
+    @staticmethod
+    def get_object(pk):
+        try:
+            return UploadFile.objects.get(pk=pk)
+        except UploadFile.DoesNotExist:
+            raise NotFound("NOT_FOUND")
+
+    def get(self, request, pk, *args, **kwargs):
+        file = self.get_object(pk)
+        serializer = UploadFileSerializer(file)
+        return Response(serializer.data)
+
+    def delete(self, request, pk, *args, **kwargs):
+        file = self.get_object(pk)
+        file.delete()
+        default_storage.delete(f"{settings.MEDIA_ROOT}/upload/{file.file_name}")
+        return Response(f'{file.file_name} delete OK')

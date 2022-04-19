@@ -1,13 +1,14 @@
 import difflib
-
+from django.conf import settings
 from rest_framework.exceptions import APIException
 
 from QAS.models import Notice
 from .query import JiebaQuery, PaddleQuery
 
 try:
-    with open(r'..\public\mydict.txt', encoding='UTF-8') as dict_file:
-        myDict = dict_file.readlines()
+    # with open(r'..\public\mydict.txt', encoding='UTF-8') as dict_file:
+    with open(settings.STATIC_ROOT + '/dictionary/notice.txt', encoding='UTF-8') as dict_file:
+        notice_dict = dict_file.readlines()
         print("Custom filename dictionary loaded successfully")
 except Exception:
     raise APIException("Custom file dictionary loading failed")
@@ -21,7 +22,7 @@ class Question:
         return f"Question:{self.question}"
 
     def get_query_results(self):
-        matched_result = difflib.get_close_matches(self.question, myDict, 1, cutoff=0.8)
+        matched_result = difflib.get_close_matches(self.question, notice_dict, 1, cutoff=0.8)
         if matched_result:
             # print("根据进行文件名字典匹配")
             # print("文件名字典", matched_result)

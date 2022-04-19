@@ -12,3 +12,13 @@ class Notice(models.Model):
 
     class Meta:
         verbose_name = '通知文件表'
+
+
+class UploadFile(models.Model):
+    id = models.AutoField(primary_key=True)
+    upload_time = models.DateTimeField(auto_now=True, blank=True, null=True, verbose_name='上传时间')
+    username = models.CharField(max_length=64, null=True)
+    file_name = models.CharField(max_length=64, null=True)
+
+    class Meta:
+        verbose_name = '上传文件表'

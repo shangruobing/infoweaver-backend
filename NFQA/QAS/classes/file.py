@@ -57,5 +57,3 @@ class File:
             self.set_attrs(**information)
         except (IndexError, TypeError):
             raise "未查到任何值"
-# 运行方式如下
-# file = File(610).execute_query(graph)

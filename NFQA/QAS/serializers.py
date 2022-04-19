@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from .models import Notice
+from .models import Notice, UploadFile
 
 
 class NoticeSerializer(serializers.HyperlinkedModelSerializer):
@@ -11,3 +11,9 @@ class NoticeSerializer(serializers.HyperlinkedModelSerializer):
         model = Notice
         fields = "__all__"
         read_only_fields = ['id']
+
+
+class UploadFileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UploadFile
+        fields = '__all__'

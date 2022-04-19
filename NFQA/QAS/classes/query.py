@@ -14,7 +14,8 @@ from QAS.filters import NoticeFilterBackend
 from QAS.utils.str2date import str_date_range
 
 try:
-    jieba.load_userdict(r'..\public\dictionary.txt')
+    # jieba.load_userdict(r'..\public\dictionary.txt')
+    jieba.load_userdict(settings.STATIC_ROOT + '/dictionary/custom_event.txt')
     print("Custom label dictionary loaded successfully")
 except Exception:
     raise APIException("Custom file dictionary loading failed")
