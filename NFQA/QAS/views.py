@@ -123,7 +123,7 @@ class Neo4jView(APIView):
         通过文件名匹配->Neo4j->百度百科的顺序依次进行查询
         """
         question = request.data['question']
-        print("request", request.data)
+        # print("request", request.data)
         state, history = is_have_history(request)
 
         if state:

@@ -30,9 +30,9 @@ class Cypher:
             "ORG": "org",
             "PER": "person"
         }
-        print("Paddle识别开始")
+        # print("Paddle识别开始")
         for question, flag in words:
-            print(question, flag)
+            # print(question, flag)
             try:
                 condition.append({'question_type': nodes_label[flag], 'question': question})
             except KeyError as e:
