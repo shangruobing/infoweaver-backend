@@ -10,3 +10,7 @@ paddlepaddle-tiny==1.6.1
 lxml==4.8.0
 transformers==4.17.0
 python-docx==0.8.11
+spacy==3.2.4
+pip
+setuptools
+wheel

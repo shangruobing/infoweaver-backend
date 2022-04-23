@@ -81,7 +81,7 @@ DATABASES = {
         {
             'HOST': "http://localhost:7474",
             "USER": "neo4j",  # 图数据库用户名 需要更改！
-            "PASSWORD": '010209',  # 图数据库密码 需要更改！
+            "PASSWORD": 'neo4j',  # 图数据库密码 需要更改！
         }
 }
 
