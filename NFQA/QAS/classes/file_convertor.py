@@ -1,7 +1,7 @@
 import os
 
 from docx import Document
-from win32com import client as wc
+# from win32com import client as wc
 from tqdm import tqdm
 import abc
 from abc import ABC
