@@ -56,4 +56,4 @@ class File:
             }
             self.set_attrs(**information)
         except (IndexError, TypeError):
-            raise "未查到任何值"
+            raise "Index or Type Error"

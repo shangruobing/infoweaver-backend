@@ -14,7 +14,6 @@ from QAS.filters import NoticeFilterBackend
 from QAS.utils.str2date import str_date_range
 
 try:
-    # jieba.load_userdict(r'..\public\dictionary.txt')
     jieba.load_userdict(settings.STATIC_ROOT + '/dictionary/custom_event.txt')
     print("Custom label dictionary loaded successfully")
 except Exception:
@@ -25,9 +24,7 @@ try:
     graph = Graph(config.get("HOST"), auth=(config.get("USER"), config.get("PASSWORD")))
     print("Neo4j graph database connected successfully")
 except py2neo.errors.ConnectionUnavailable:
-    # raise APIException("Neo4j graph database connection failed")
-    graph = None
-    print("Neo4j graph database connection failed")
+    raise APIException("Neo4j graph database connection failed")
 
 
 class Query(ABC):
@@ -117,5 +114,4 @@ class DateQuery(Query):
         notices = Notice.objects.all()
         notice_filter = NoticeFilterBackend()
         id_list = notice_filter.date_filter(notices, start_date=start_date, end_date=end_date)
-        # print("时间过滤器", id_list)
         return id_list

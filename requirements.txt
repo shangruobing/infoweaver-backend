@@ -14,3 +14,4 @@ spacy==3.2.4
 pip
 setuptools
 wheel
+cryptography==36.0.2

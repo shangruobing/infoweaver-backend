@@ -6,7 +6,6 @@ from QAS.models import Notice
 from .query import JiebaQuery, PaddleQuery
 
 try:
-    # with open(r'..\public\mydict.txt', encoding='UTF-8') as dict_file:
     with open(settings.STATIC_ROOT + '/dictionary/notice.txt', encoding='UTF-8') as dict_file:
         notice_dict = dict_file.readlines()
         print("Custom filename dictionary loaded successfully")
@@ -44,9 +43,6 @@ class Question:
         """
         sql_list = JiebaQuery(question).execute_query()
         neo_list = PaddleQuery(question).execute_query()
-
-        # print("jieba查询结果", sql_list)
-        # print("Paddle查询结果", neo_list)
 
         id_list = []
         if sql_list and neo_list:

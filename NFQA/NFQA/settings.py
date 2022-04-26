@@ -12,7 +12,6 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 import os
 from pathlib import Path
 
-# import django_filters.rest_framework
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = 'django-insecure-k+@gtqz^w72bt^-(mpd7d%j^_8b7@0wg7hq9!=l(y^+wwws=sh'
@@ -44,6 +43,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
 CORS_ORIGIN_ALLOW_ALL = True
 CORS_ALLOW_CREDENTIALS = True
 
@@ -85,6 +85,25 @@ DATABASES = {
         }
 }
 
+# Linux configuration
+# DATABASES = {
+#     'default':
+#         {
+#             'ENGINE': 'django.db.backends.mysql',
+#             'NAME': 'nfqa',
+#             'HOST': 'localhost',
+#             'PORT': 3306,
+#             'USER': 'django-user',
+#             'PASSWORD': '123456',
+#         },
+#     'neo4j':
+#         {
+#             'HOST': "http://43.138.43.128:7474",
+#             "USER": "neo4j",
+#             "PASSWORD": 'neo4j',
+#         }
+# }
+
 AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
@@ -103,6 +122,7 @@ AUTH_PASSWORD_VALIDATORS = [
 LANGUAGE_CODE = 'en-us'
 
 TIME_ZONE = 'Asia/Shanghai'
+
 USE_I18N = True
 
 USE_L10N = True

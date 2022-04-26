@@ -27,7 +27,6 @@ from .pagination import FileListPagination, NoticePagination, UploadFilePaginati
 
 try:
     model = BertModel()
-    # model = None
     print("BERT model loaded successfully")
 except RuntimeError:
     print("BERT model load failed")
