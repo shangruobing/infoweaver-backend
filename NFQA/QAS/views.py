@@ -21,6 +21,7 @@ from .classes.file_convertor import Docx2txt
 from .utils import answer_type
 from .utils.threads import MultithreadingBert
 from .utils.system_info import get_system_info
+from .classes.chat import ChatManager
 from .classes.pretrained_model import BertModel
 from .classes.Neo4jDataLoader import Neo4jDataLoader
 from .serializers import NoticeSerializer, UploadFileSerializer
@@ -123,31 +124,41 @@ class Neo4jView(APIView):
         本方法是问答机器人的主方法
         通过文件名匹配->Neo4j->百度百科的顺序依次进行查询
         """
-        question = request.data['question']
+        try:
+            question = request.data['question']
+            print(request.data)
 
-        has_history = request.data.get('has_history', False)
+            chatManager = ChatManager(question)
+            reply_type, reply = chatManager.get_reply()
 
-        if has_history:
-            history = request.data.get('history')
-            file_id = history.get('file_id', '')
-            cypher = f"match (title)-[]-(context:File) where id(title)={file_id} return context.name"
-            context = graph.run(cypher).data()[0].get("context.name", "")
-            context = ''.join(context.split()).strip()
-            result = MultithreadingBert(model, question, context, thread_number=8).run_threads()
-            return Response({"answer_type": answer_type.BERT, "results": result})
+            if reply:
+                return Response({"answer_type": reply_type, "results": reply})
 
-        else:
-            question_object = Question(question)
-            result_type, result = question_object.get_query_results()
+            has_history = request.data.get('has_history', False)
 
-            if result_type in (answer_type.DATABASE, answer_type.LOCAL):
-                serializer = NoticeSerializer(result, many=True, context={'request': request})
-                paginator = NoticePagination()
-                page_user_list = paginator.paginate_queryset(serializer.data, self.request, view=self)
-                return paginator.get_paginated_response(page_user_list)
+            if has_history:
+                history = request.data.get('history')
+                file_id = history.get('file_id', '')
+                cypher = f"match (title)-[]-(context:File) where id(title)={file_id} return context.name"
+                context = graph.run(cypher).data()[0].get("context.name", "")
+                context = ''.join(context.split()).strip()
+                result = MultithreadingBert(model, question, context, thread_number=8).run_threads()
+                return Response({"answer_type": answer_type.BERT, "results": result})
 
             else:
-                return Response({"answer_type": result_type, "results": result})
+                question_object = Question(question)
+                result_type, result = question_object.get_query_results()
+
+                if result_type in (answer_type.DATABASE, answer_type.LOCAL):
+                    serializer = NoticeSerializer(result, many=True, context={'request': request})
+                    paginator = NoticePagination()
+                    page_user_list = paginator.paginate_queryset(serializer.data, self.request, view=self)
+                    return paginator.get_paginated_response(page_user_list)
+
+                else:
+                    return Response({"answer_type": result_type, "results": result})
+        except Exception:
+            return Response({"answer_type": answer_type.UNKNOWN, "results": None})
 
     def put(self, request, *args, **kwargs):
 

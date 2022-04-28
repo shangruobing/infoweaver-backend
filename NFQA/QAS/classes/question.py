@@ -1,4 +1,3 @@
-import csv
 import difflib
 from django.conf import settings
 from rest_framework.exceptions import APIException
@@ -13,11 +12,6 @@ try:
         notice_dict = dict_file.readlines()
         print("Custom filename dictionary loaded successfully")
 
-    with open(settings.STATIC_ROOT + '/dictionary/daily_chat.csv', encoding='UTF-8') as corpus_file:
-        reader = csv.DictReader(corpus_file)
-        corpus = [dict(i) for i in reader]
-        print("Daily chat corpus loaded successfully")
-
 except Exception:
     raise APIException("Custom file dictionary loading failed")
 
@@ -30,30 +24,24 @@ class Question:
         return f"Question:{self.question}"
 
     def get_query_results(self):
-        matched_result = execute_corpus_match(self.question)
-
+        matched_result = difflib.get_close_matches(self.question, notice_dict, 1, cutoff=0.8)
         if matched_result:
-            return answer_type.CHAT, matched_result
+            notices = Notice.objects.filter(name__icontains=matched_result[0][:-5])
+            return answer_type.LOCAL, notices
 
         else:
-            matched_result = difflib.get_close_matches(self.question, notice_dict, 1, cutoff=0.8)
-            if matched_result:
-                notices = Notice.objects.filter(name__icontains=matched_result[0][:-5])
-                return answer_type.LOCAL, notices
+            id_list = self.execute_query(self.question)
+            notices = Notice.objects.filter(file_id__in=id_list)
+
+            if notices:
+                return answer_type.DATABASE, notices
 
             else:
-                id_list = self.execute_query(self.question)
-                notices = Notice.objects.filter(file_id__in=id_list)
-
-                if not notices:
-                    answer = baidu_search(self.question)
-
-                    if len(answer) == 0:
-                        return answer_type.UNKNOWN, None
-
+                answer = baidu_search(self.question)
+                if len(answer) != 0:
                     return answer_type.BAIDU, answer
 
-                return answer_type.DATABASE, notices
+        return answer_type.UNKNOWN, None
 
     def execute_query(self, question: str) -> []:
         """
@@ -72,9 +60,3 @@ class Question:
         elif neo_list:
             id_list = neo_list
         return id_list
-
-
-def execute_corpus_match(question):
-    for i in corpus:
-        if question == i["Question"]:
-            return i["Answer"]
