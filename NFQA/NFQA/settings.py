@@ -12,12 +12,14 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 import os
 from pathlib import Path
 
+# !!!通过设置是否开发模式，来动态修改数据库配置文件和是否Debug
+is_development_mode = True
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = 'django-insecure-k+@gtqz^w72bt^-(mpd7d%j^_8b7@0wg7hq9!=l(y^+wwws=sh'
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = is_development_mode
 
 ALLOWED_HOSTS = ["*"]
 
@@ -67,42 +69,43 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'NFQA.wsgi.application'
 
-DATABASES = {
-    'default':
-        {
-            'ENGINE': 'django.db.backends.mysql',
-            'NAME': 'NFQA',
-            'HOST': '127.0.0.1',
-            'PORT': 3306,
-            'USER': 'root',  # 数据库用户名 需要更改！
-            'PASSWORD': '010209',  # 数据库密码 需要更改！
-        },
-    'neo4j':
-        {
-            'HOST': "http://localhost:7474",
-            "USER": "neo4j",  # 图数据库用户名 需要更改！
-            "PASSWORD": 'neo4j',  # 图数据库密码 需要更改！
-        }
-}
+if is_development_mode:
+    DATABASES = {
+        'default':
+            {
+                'ENGINE': 'django.db.backends.mysql',
+                'NAME': 'NFQA',
+                'HOST': '127.0.0.1',
+                'PORT': 3306,
+                'USER': 'root',  # 数据库用户名 需要更改！
+                'PASSWORD': '010209',  # 数据库密码 需要更改！
+            },
+        'neo4j':
+            {
+                'HOST': "http://localhost:7474",
+                "USER": "neo4j",  # 图数据库用户名 需要更改！
+                "PASSWORD": '010209',  # 图数据库密码 需要更改！
+            }
+    }
 
-# Linux configuration
-# DATABASES = {
-#     'default':
-#         {
-#             'ENGINE': 'django.db.backends.mysql',
-#             'NAME': 'nfqa',
-#             'HOST': 'localhost',
-#             'PORT': 3306,
-#             'USER': 'django-user',
-#             'PASSWORD': '123456',
-#         },
-#     'neo4j':
-#         {
-#             'HOST': "http://43.138.43.128:7474",
-#             "USER": "neo4j",
-#             "PASSWORD": 'neo4j',
-#         }
-# }
+else:
+    DATABASES = {
+        'default':
+            {
+                'ENGINE': 'django.db.backends.mysql',
+                'NAME': 'nfqa',
+                'HOST': 'localhost',
+                'PORT': 3306,
+                'USER': 'django-user',
+                'PASSWORD': '123456',
+            },
+        'neo4j':
+            {
+                'HOST': "http://43.138.43.128:7474",
+                "USER": "neo4j",
+                "PASSWORD": 'neo4j',
+            }
+    }
 
 AUTH_PASSWORD_VALIDATORS = [
     {

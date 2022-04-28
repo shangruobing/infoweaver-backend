@@ -16,13 +16,13 @@ Including another URLconf
 
 from django.contrib import admin
 from django.urls import path
-from QAS.views import HomeView, NoticeListView, NoticeView, Neo4jView, TestView, \
+from QAS.views import HomeView, NoticeListView, NoticeView, Neo4jView, SystemView, \
     UploadFileListView, UploadFileView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', HomeView.as_view()),
-    path('api/test/', TestView.as_view()),
+    path('api/sysinfo/', SystemView.as_view()),
     path('api/word/', NoticeListView.as_view()),
     path('api/word/<int:pk>', NoticeView.as_view(), name='notice-detail'),
     path('api/neo4j/', Neo4jView.as_view()),

@@ -19,7 +19,8 @@ class File:
 
     def execute_query(self, graph):
         try:
-            cypher = f"match (title:Title)-[]-(file:File), (title:Title)-[*2]-(m) where id(title)={self.file_id} return title,file,collect(m)"
+            cypher = f"""match (title:Title)-[]-(file:File), (title:Title)-[*2]-(m) 
+            where id(title)={self.file_id} return title,file,collect(m)"""
 
             result = graph.run(cypher).data()[0]
             title = result['title']['name']

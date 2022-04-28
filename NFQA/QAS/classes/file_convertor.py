@@ -44,7 +44,7 @@ class Doc2docx(FileConvertor):
                 print(file, " ERROR!")
                 continue
         w.Quit()
-        print("Finished!")
+        return "Finished!"
 
 
 class Docx2txt(FileConvertor):
@@ -69,4 +69,4 @@ class Docx2txt(FileConvertor):
             except Exception:
                 print(file, " ERROR!")
                 continue
-        print("Finished")
+        return "Finished!"

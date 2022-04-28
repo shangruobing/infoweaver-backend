@@ -1,0 +1,6 @@
+BAIDU = "baidu"
+DATABASE = "database_search"
+CHAT = "chat"
+LOCAL = "local"
+BERT = "bert"
+UNKNOWN = "unknown"

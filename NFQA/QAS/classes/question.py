@@ -1,14 +1,23 @@
+import csv
 import difflib
 from django.conf import settings
 from rest_framework.exceptions import APIException
 
 from QAS.models import Notice
 from .query import JiebaQuery, PaddleQuery
+from ..utils.baidu_search import baidu_search
+from ..utils import answer_type
 
 try:
     with open(settings.STATIC_ROOT + '/dictionary/notice.txt', encoding='UTF-8') as dict_file:
         notice_dict = dict_file.readlines()
         print("Custom filename dictionary loaded successfully")
+
+    with open(settings.STATIC_ROOT + '/dictionary/daily_chat.csv', encoding='UTF-8') as corpus_file:
+        reader = csv.DictReader(corpus_file)
+        corpus = [dict(i) for i in reader]
+        print("Daily chat corpus loaded successfully")
+
 except Exception:
     raise APIException("Custom file dictionary loading failed")
 
@@ -21,19 +30,30 @@ class Question:
         return f"Question:{self.question}"
 
     def get_query_results(self):
-        matched_result = difflib.get_close_matches(self.question, notice_dict, 1, cutoff=0.8)
-        if matched_result:
-            # print("根据进行文件名字典匹配")
-            # print("文件名字典", matched_result)
-            notices = Notice.objects.filter(name__icontains=matched_result[0][:-5])
-            # print("文件名", matched_result[0][:-5])
-            # print("文件查询结果", notices)
-        else:
-            # print("文件名字典匹配失败 进行数据库查询")
-            id_list = self.execute_query(self.question)
-            notices = Notice.objects.filter(file_id__in=id_list)
+        matched_result = execute_corpus_match(self.question)
 
-        return notices
+        if matched_result:
+            return answer_type.CHAT, matched_result
+
+        else:
+            matched_result = difflib.get_close_matches(self.question, notice_dict, 1, cutoff=0.8)
+            if matched_result:
+                notices = Notice.objects.filter(name__icontains=matched_result[0][:-5])
+                return answer_type.LOCAL, notices
+
+            else:
+                id_list = self.execute_query(self.question)
+                notices = Notice.objects.filter(file_id__in=id_list)
+
+                if not notices:
+                    answer = baidu_search(self.question)
+
+                    if len(answer) == 0:
+                        return answer_type.UNKNOWN, None
+
+                    return answer_type.BAIDU, answer
+
+                return answer_type.DATABASE, notices
 
     def execute_query(self, question: str) -> []:
         """
@@ -47,11 +67,14 @@ class Question:
         id_list = []
         if sql_list and neo_list:
             id_list = set(sql_list).intersection(set(neo_list))
-            # print("jieba & Paddle结果交集", id_list)
         elif sql_list:
             id_list = sql_list
-            # print('jieba结果集 Paddle结果为空', id_list)
         elif neo_list:
             id_list = neo_list
-            # print("Paddle结果集 jieba结果为空", id_list)
         return id_list
+
+
+def execute_corpus_match(question):
+    for i in corpus:
+        if question == i["Question"]:
+            return i["Answer"]

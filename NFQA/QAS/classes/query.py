@@ -51,11 +51,8 @@ class JiebaQuery(Query):
         :return: 文件ID列表
         """
         jieba_words = pseg.cut(self.question, use_paddle=False)
-        # print("jieba识别开始")
         for i, flag in jieba_words:
-            # print(i, flag)
             if flag == "event":
-                # print("jieba识别一个自定义的Event Label", i)
                 queryset = Notice.objects.filter(label__icontains=i)
                 id_list = [i.file_id for i in queryset]
                 return id_list
@@ -74,7 +71,6 @@ class PaddleQuery(Query):
             return id_list
 
         cypher = Cypher(self.question).get_cypher()
-        # print("Cypher", cypher)
         answer = graph.run(cypher).data()
         id_list = [i['id(answer)'] for i in answer]
         return id_list
@@ -86,15 +82,12 @@ class PaddleQuery(Query):
         :return:查询结果的文件ID列表
         """
         words = pseg.cut(question, use_paddle=True)
-        # print("时间识别开始")
         id_list = []
         for question, flag in words:
-            # print(question, flag)
             if flag == 'TIME' and question in ["去年", "今年", "明年",
                                                "上个月", "本月", "下个月",
                                                "上周", "本周", "下周",
                                                "昨天", "今天", "明天"]:
-                # print("进入了MySQL的日期范围匹配")
                 id_list = DateQuery(question).execute_query()
                 break
         return id_list

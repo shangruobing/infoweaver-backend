@@ -35,16 +35,14 @@ class Neo4jDataLoader:
         dataset = []
         for i in range(len(titleList)):
             dataset.append((titleList[i], result_text[i]))
-        print(dataset)
 
         # 数据集正式导入数据库
         for i in tqdm(iterable=dataset, desc="txt => neo4j loading"):
             try:
                 self.load_data(title=i[0], text=i[1])
-            except Exception as e:
-                print(i[0], e)
+            except Exception:
                 continue
-        print("Success Loading!")
+        return "Success Loading!"
 
     def load_data(self, title, text):
         """单篇文章导入图数据库"""
