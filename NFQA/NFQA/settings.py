@@ -10,10 +10,12 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.2/ref/settings/
 """
 import os
+import datetime
 from pathlib import Path
 
 # !!!通过设置是否开发模式，来动态修改数据库配置文件和是否Debug
-is_development_mode = True
+# is_development_mode = True
+is_development_mode = False
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -141,3 +143,62 @@ STATIC_ROOT = os.path.join(BASE_DIR, "static")
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, "media")
+
+REST_FRAMEWORK = {
+    "DEFAULT_PARSER_CLASSES": {
+        'rest_framework.parsers.JSONParser'
+    },
+
+    'DEFAULT_RENDERER_CLASSES': [
+        'rest_framework.renderers.JSONRenderer',
+    ],
+
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "sims.authentication.MyJWTAuthenticate"
+    ],
+
+    "DEFAULT_PERMISSION_CLASSES": [
+        "rest_framework.permissions.IsAuthenticated",
+    ],
+
+    "DEFAULT_THROTTLE_CLASSES": [
+        "sims.throttle.MyThrottle"
+    ],
+
+    "DEFAULT_THROTTLE_RATES": {
+        "mySimpleThrottle": '10/m'
+    },
+
+    # "DEFAULT_PAGINATION_CLASS": {
+    #     'sims.pagination.MyPagination'
+    # }
+
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 10  # 每页最大数据量
+}
+APPEND_SLASH = True
+
+JWT_AUTH = {
+    # token过期时间
+    'JWT_EXPIRATION_DELTA': datetime.timedelta(days=1),
+    # 允许刷新
+    'JWT_ALLOW_REFRESH': True,
+    # 刷新的过期时间
+    'JWT_REFRESH_EXPIRATION_DELTA': datetime.timedelta(days=1),
+    'JWT_AUTH_HEADER_PREFIX': 'JWT'
+}
+
+AUTH_USER_MODEL = 'qas.User'  # 自定义用户表
+
+# REDIS_TIMEOUT=10
+# CACHES = {
+#     "default": {
+#         "BACKEND": "django_redis.cache.RedisCache",
+#         "LOCATION": "redis://127.0.0.1:6379",
+#         "OPTIONS": {
+#             # 忽略连接异常
+#             "CLIENT_CLASS": "django_redis.client.DefaultClient",
+#             "IGNORE_EXCEPTIONS": True,
+#         }
+#     }
+# }

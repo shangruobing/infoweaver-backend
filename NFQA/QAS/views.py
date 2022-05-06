@@ -1,4 +1,5 @@
 import os
+import csv
 import time
 import shutil
 
@@ -13,7 +14,7 @@ from rest_framework.response import Response
 from rest_framework.exceptions import NotFound
 
 from .classes.query import graph
-from .models import Notice, UploadFile
+from .models import Notice, UploadFile, User
 from .classes.question import Question
 from .filters import NoticeFilterBackend
 from .classes.file_convertor import Docx2txt
@@ -24,8 +25,8 @@ from .utils.system_info import get_system_info
 from .classes.chat import ChatManager
 from .classes.pretrained_model import BertModel
 from .classes.Neo4jDataLoader import Neo4jDataLoader
-from .serializers import NoticeSerializer, UploadFileSerializer
-from .pagination import FileListPagination, NoticePagination, UploadFilePagination
+from .pagination import GenericPagination, NoticePagination, UploadFilePagination
+from .serializers import NoticeSerializer, UploadFileSerializer, UserSerializer, LoginSerializer
 
 try:
     model = BertModel()
@@ -57,7 +58,7 @@ class NoticeListView(APIView):
         notice_filter = NoticeFilterBackend()
         notices = notice_filter.filter_queryset(request, notices, view=self)
         serializer = NoticeSerializer(notices, many=True, context={'request': request})
-        paginator = FileListPagination()
+        paginator = GenericPagination()
         page_user_list = paginator.paginate_queryset(serializer.data, self.request, view=self)
         return paginator.get_paginated_response(page_user_list)
 
@@ -251,3 +252,100 @@ class UploadFileView(APIView):
         file.delete()
         default_storage.delete(f"{settings.MEDIA_ROOT}/upload/{file.file_name}")
         return Response(f'{file.file_name} delete OK')
+
+
+class CorpusListView(APIView):
+
+    def get(self, request, *args, **kwargs):
+        """
+        查询语料库
+        """
+        with open(settings.STATIC_ROOT + '/dictionary/daily_chat.csv', "r", encoding='UTF-8') as corpus_file:
+            reader = csv.DictReader(corpus_file)
+            corpus = [i for i in reader]
+            paginator = GenericPagination()
+            page_user_list = paginator.paginate_queryset(corpus, self.request, view=self)
+            return paginator.get_paginated_response(page_user_list)
+
+    def post(self, request, *args, **kwargs):
+        question = request.data.get("question")
+        answer = request.data.get("answer")
+        data = [question, answer]
+
+        with open(settings.STATIC_ROOT + '/dictionary/daily_chat.csv', "a", encoding='UTF-8') as corpus_csv:
+            writer = csv.writer(corpus_csv)
+            writer.writerow(data)
+            return Response(f'Add {data} OK')
+
+
+class UserListView(APIView):
+    authentication_classes = []
+    permission_classes = []
+
+    # @method_decorator(cache_page(60 * 60 * 2))
+    # @method_decorator(vary_on_headers("Authorization", ))
+    def get(self, request, *args, **kwargs):
+        users = User.objects.all()
+        user_serializer = UserSerializer(users, many=True)
+        paginator = GenericPagination()
+        page_user_list = paginator.paginate_queryset(user_serializer.data,
+                                                     self.request, view=self)
+        return paginator.get_paginated_response(page_user_list)
+
+    def post(self, request, *args, **kwargs):
+        serializer = UserSerializer(data=request.data)
+        print(request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class UserView(APIView):
+    """
+    Retrieve, update or delete a user instance.
+    """
+
+    # permission_classes = [StudentOnlyReadOwnPermission]
+
+    def get_object(self, pk):
+        try:
+            return User.objects.get(pk=pk)
+        except User.DoesNotExist:
+            raise NotFound("NOT_FOUND")
+
+    def get(self, request, pk, *args, **kwargs):
+        user = self.get_object(pk)
+        serializer = UserSerializer(user)
+        return Response(serializer.data)
+
+    def put(self, request, pk, *args, **kwargs):
+        user = self.get_object(pk)
+        user.user_id = pk
+        serializer = UserSerializer(user, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, pk, *args, **kwargs):
+        user = self.get_object(pk)
+        data = {"message": "Successfully Delete",
+                "user_id": user.user_id,
+                "username": user.username}
+        user.delete()
+        return Response(data, status=status.HTTP_204_NO_CONTENT)
+
+
+class LoginAPIView(APIView):
+    authentication_classes = []
+    permission_classes = []
+
+    def post(self, request, *args, **kwargs):
+        user_ser = LoginSerializer(data=request.data)
+        user_ser.is_valid(raise_exception=True)
+        data = {
+            'username': user_ser.user.username,
+            'token': user_ser.token
+        }
+        return Response(data, status=status.HTTP_200_OK)

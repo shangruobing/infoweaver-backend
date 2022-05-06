@@ -15,3 +15,5 @@ pip
 setuptools
 wheel
 cryptography==36.0.2
+djangorestframework-jwt==1.11.0
+jwt=1.3.1

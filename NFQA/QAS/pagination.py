@@ -5,7 +5,7 @@ from rest_framework.pagination import PageNumberPagination
 from .utils import answer_type
 
 
-class FileListPagination(PageNumberPagination):
+class GenericPagination(PageNumberPagination):
     # 默认每页显示的数据条数
     page_size = 10
     # 获取URL参数中设置的每页显示数据条数

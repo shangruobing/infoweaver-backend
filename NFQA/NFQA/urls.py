@@ -17,11 +17,16 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 from QAS.views import HomeView, NoticeListView, NoticeView, Neo4jView, SystemView, \
-    UploadFileListView, UploadFileView
+    UploadFileListView, UploadFileView, CorpusListView, UserView, UserListView, LoginAPIView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', HomeView.as_view()),
+
+    path('api/login/', LoginAPIView.as_view()),
+    path('api/user/', UserListView.as_view()),
+    path('api/user/<int:pk>/', UserView.as_view()),
+
     path('api/sysinfo/', SystemView.as_view()),
     path('api/word/', NoticeListView.as_view()),
     path('api/word/<int:pk>', NoticeView.as_view(), name='notice-detail'),
@@ -30,5 +35,6 @@ urlpatterns = [
 
     path('api/upload/', UploadFileListView.as_view()),
     path('api/upload/<int:pk>/', UploadFileView.as_view()),
+    path('api/corpus/', CorpusListView.as_view()),
 
 ]
