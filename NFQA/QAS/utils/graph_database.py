@@ -1,9 +1,7 @@
-from py2neo import Graph, Node
+from py2neo import Node
+from ..db_conntcion import getGraphInstance
 
-from django.conf import settings
-
-config = settings.DATABASES.get("neo4j")
-graph = Graph(config.get("HOST"), auth=(config.get("USER"), config.get("PASSWORD")))
+graph = getGraphInstance()
 
 
 def create_node(label, name):

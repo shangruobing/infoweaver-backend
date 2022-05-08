@@ -1,6 +1,5 @@
 import difflib
 from django.conf import settings
-from rest_framework.exceptions import APIException
 
 from QAS.models import Notice
 from .query import JiebaQuery, PaddleQuery
@@ -13,7 +12,7 @@ try:
         print("Custom filename dictionary loaded successfully")
 
 except Exception:
-    raise APIException("Custom file dictionary loading failed")
+    raise RuntimeError("Custom file dictionary loading failed")
 
 
 class Question:

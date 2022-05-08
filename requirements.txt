@@ -16,4 +16,5 @@ setuptools
 wheel
 cryptography==36.0.2
 djangorestframework-jwt==1.11.0
-jwt=1.3.1
+PyJWT==1.7.0
+psutil==5.9.0

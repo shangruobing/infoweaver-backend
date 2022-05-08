@@ -1,11 +1,10 @@
 import jieba
 import jieba.posseg as pseg
-from rest_framework.exceptions import APIException
 
 try:
     jieba.enable_paddle()
 except Exception:
-    raise APIException("Paddle loading failed")
+    raise RuntimeError("Paddle loading failed")
 
 
 class Cypher:

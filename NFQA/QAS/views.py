@@ -13,35 +13,38 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.exceptions import NotFound
 
-from .classes.query import graph
-from .models import Notice, UploadFile, User
-from .classes.question import Question
-from .filters import NoticeFilterBackend
-from .classes.file_convertor import Docx2txt
-
 from .utils import answer_type
+from .classes.query import graph
+from .classes.question import Question
+from .classes.chat import ChatManager
+from .filters import NoticeFilterBackend
+from .models import Notice, UploadFile, User
+from .classes.file_convertor import Docx2txt
 from .utils.threads import MultithreadingBert
 from .utils.system_info import get_system_info
-from .classes.chat import ChatManager
 from .classes.pretrained_model import BertModel
-from .classes.Neo4jDataLoader import Neo4jDataLoader
+from .classes.graph_loader import Neo4jDataLoader
 from .pagination import GenericPagination, NoticePagination, UploadFilePagination
 from .serializers import NoticeSerializer, UploadFileSerializer, UserSerializer, LoginSerializer
 
 try:
-    model = BertModel()
+    # Warning!!!
+    model = None
+
+    # model = BertModel()
     print("BERT model loaded successfully")
-except RuntimeError:
-    raise Exception("BERT model load failed")
+except Exception:
+    raise RuntimeError("BERT model load failed")
 
 
 class SystemView(APIView):
     def get(self, request, *args, **kwargs):
-        xx = get_system_info()
-        return Response(xx, status=status.HTTP_200_OK)
+        return Response(get_system_info(), status=status.HTTP_200_OK)
 
 
 class HomeView(APIView):
+    authentication_classes = []
+
     def get(self, request, *args, **kwargs):
         return Response("Welcome Notice File Question & Answer System !", status=status.HTTP_200_OK)
 
@@ -294,7 +297,6 @@ class UserListView(APIView):
 
     def post(self, request, *args, **kwargs):
         serializer = UserSerializer(data=request.data)
-        print(request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -305,8 +307,6 @@ class UserView(APIView):
     """
     Retrieve, update or delete a user instance.
     """
-
-    # permission_classes = [StudentOnlyReadOwnPermission]
 
     def get_object(self, pk):
         try:
@@ -321,7 +321,7 @@ class UserView(APIView):
 
     def put(self, request, pk, *args, **kwargs):
         user = self.get_object(pk)
-        user.user_id = pk
+        user.id = pk
         serializer = UserSerializer(user, data=request.data)
         if serializer.is_valid():
             serializer.save()
@@ -331,7 +331,7 @@ class UserView(APIView):
     def delete(self, request, pk, *args, **kwargs):
         user = self.get_object(pk)
         data = {"message": "Successfully Delete",
-                "user_id": user.user_id,
+                "id": user.id,
                 "username": user.username}
         user.delete()
         return Response(data, status=status.HTTP_204_NO_CONTENT)
@@ -342,10 +342,10 @@ class LoginAPIView(APIView):
     permission_classes = []
 
     def post(self, request, *args, **kwargs):
-        user_ser = LoginSerializer(data=request.data)
-        user_ser.is_valid(raise_exception=True)
-        data = {
-            'username': user_ser.user.username,
-            'token': user_ser.token
+        serializer = LoginSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        auth = {
+            'username': serializer.user.username,
+            'token': serializer.token
         }
-        return Response(data, status=status.HTTP_200_OK)
+        return Response(auth, status=status.HTTP_200_OK)

@@ -4,13 +4,12 @@ from django.contrib.auth.models import AbstractUser, UserManager, AbstractBaseUs
 
 class User(AbstractBaseUser):
     ROLE_CHOICES = [
+        ('0', 'Administrator'),
         ('1', 'Student'),
-        ('2', 'Teacher'),
-        ('3', 'Admin')
+        ('2', 'Teacher')
     ]
-    user_id = models.IntegerField(primary_key=True, verbose_name="用户ID")
+    id = models.AutoField(primary_key=True, verbose_name="用户ID")
     name = models.CharField(max_length=30, verbose_name='姓名', default='')
-    age = models.IntegerField(verbose_name="年龄", default=0)
     username = models.CharField(max_length=10, verbose_name='用户名', unique=True)
     role = models.CharField(max_length=30, choices=ROLE_CHOICES, default=0)
     password = models.CharField(max_length=256, verbose_name='密码')

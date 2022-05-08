@@ -2,14 +2,12 @@ import abc
 from abc import ABC
 
 import jieba
-import py2neo
-from py2neo import Graph
 import jieba.posseg as pseg
 from django.conf import settings
-from rest_framework.exceptions import APIException
 
 from .cypher import Cypher
 from QAS.models import Notice
+from ..db_conntcion import getGraphInstance
 from QAS.filters import NoticeFilterBackend
 from QAS.utils.str2date import str_date_range
 
@@ -17,14 +15,12 @@ try:
     jieba.load_userdict(settings.STATIC_ROOT + '/dictionary/custom_event.txt')
     print("Custom label dictionary loaded successfully")
 except Exception:
-    raise APIException("Custom file dictionary loading failed")
+    raise RuntimeError("Custom file dictionary loading failed")
 
 try:
-    config = settings.DATABASES.get("neo4j")
-    graph = Graph(config.get("HOST"), auth=(config.get("USER"), config.get("PASSWORD")))
-    print("Neo4j graph database connected successfully")
-except py2neo.errors.ConnectionUnavailable:
-    raise APIException("Neo4j graph database connection failed")
+    graph = getGraphInstance()
+except Exception:
+    raise RuntimeError("Neo4j graph database connection failed")
 
 
 class Query(ABC):
