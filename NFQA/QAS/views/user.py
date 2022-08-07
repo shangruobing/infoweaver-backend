@@ -52,3 +52,11 @@ class UserView(APIView):
         serializer = UserSerializer(user, data=request.data)
         if serializer.is_valid():
             return Response(serializer.data)
+
+    def delete(self, request, pk, *args, **kwargs):
+        user = self.get_object(pk)
+        data = {"message": "Successfully Delete",
+                "user_id": user.user_id,
+                "username": user.username}
+        user.delete()
+        return Response(data, status=status.HTTP_204_NO_CONTENT)

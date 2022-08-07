@@ -2,7 +2,7 @@ from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
 
-from ..serializers import UserSerializer, LoginSerializer
+from ..serializers import LoginSerializer
 
 
 class LoginAPIView(APIView):
@@ -17,10 +17,3 @@ class LoginAPIView(APIView):
             'token': serializer.token
         }
         return Response(auth, status=status.HTTP_200_OK)
-
-    def put(self, request, pk, *args, **kwargs):
-        user = self.get_object(pk)
-        user.id = pk
-        serializer = UserSerializer(user, data=request.data)
-        if serializer.is_valid():
-            return Response(serializer.data)
