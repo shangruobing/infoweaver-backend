@@ -7,11 +7,14 @@ RECORD = {
 }
 
 
-class MyThrottle(BaseThrottle):
+class GenericThrottle(BaseThrottle):
     ctime = time.time
     # 60s 10次
     time_request = 60  # 访问时间
     num_request = 30  # 访问次数
+
+    def __init__(self):
+        self.ident = None
 
     def get_ident(self, request):
         """

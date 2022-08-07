@@ -7,9 +7,9 @@ model_path = settings.STATIC_ROOT + "/models"
 class BertModel:
     def __init__(self):
         self.model = self.__init_model()
+        self.name = 'uer/roberta-base-chinese-extractive-qa'
 
     def __init_model(self):
-        # Model name 'uer/roberta-base-chinese-extractive-qa'
         model = AutoModelForQuestionAnswering.from_pretrained(model_path)
         tokenizer = AutoTokenizer.from_pretrained(model_path)
         return pipeline('question-answering', model=model, tokenizer=tokenizer)

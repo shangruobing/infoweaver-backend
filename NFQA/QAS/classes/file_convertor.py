@@ -1,6 +1,7 @@
 import os
 
 from docx import Document
+
 # linux can't use win32com
 # from win32com import client as wc
 from tqdm import tqdm

@@ -38,6 +38,5 @@ class ChatManager:
 
     def execute_corpus_match(self, question: str) -> str:
         for i in self.load_corpus():
-            # for i in corpus:
             if question == i["Question"]:
                 return i["Answer"]

@@ -3,6 +3,8 @@ from tqdm import tqdm
 import spacy
 from ..utils.graph_database import create_node, create_relationship
 
+
+# spacy模型更新中 暂时无法使用
 # nlp = spacy.load("zh_core_web_lg")
 # cfg = {"segmenter": "jieba"}
 # nlp.from_config({"nlp": {"tokenizer": cfg}})
