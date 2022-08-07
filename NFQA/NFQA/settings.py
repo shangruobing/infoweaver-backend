@@ -196,6 +196,7 @@ AUTH_USER_MODEL = 'QAS.User'  # 自定义用户表
 #     }
 # }
 
-# SWAGGER_SETTINGS = {
-#     'SHOW_EXTENSIONS': False
-# }
+SWAGGER_SETTINGS = {
+    # 文档展开
+    'DOC_EXPANSION': 'list'
+}
