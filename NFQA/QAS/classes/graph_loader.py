@@ -3,9 +3,9 @@ from tqdm import tqdm
 import spacy
 from ..utils.graph_database import create_node, create_relationship
 
-nlp = spacy.load("zh_core_web_lg")
-cfg = {"segmenter": "jieba"}
-nlp.from_config({"nlp": {"tokenizer": cfg}})
+# nlp = spacy.load("zh_core_web_lg")
+# cfg = {"segmenter": "jieba"}
+# nlp.from_config({"nlp": {"tokenizer": cfg}})
 
 
 class Neo4jDataLoader:

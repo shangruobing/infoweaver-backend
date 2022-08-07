@@ -32,7 +32,7 @@ class Cypher:
         for question, flag in words:
             try:
                 condition.append({'question_type': nodes_label[flag], 'question': question})
-            except KeyError as e:
+            except KeyError as _:
                 continue
         return condition
 

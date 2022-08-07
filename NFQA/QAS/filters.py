@@ -7,9 +7,6 @@ from rest_framework import filters
 class NoticeFilterBackend(filters.BaseFilterBackend):
 
     def filter_queryset(self, request, queryset, view):
-        """暂时无用"""
-        print(request.query_params)
-        print(request)
         name = request.query_params.get('name')
         if name is not None:
             queryset = queryset.filter(name__icontains=name)

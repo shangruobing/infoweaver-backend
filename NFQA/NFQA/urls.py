@@ -16,25 +16,27 @@ Including another URLconf
 
 from django.contrib import admin
 from django.urls import path
-from QAS.views import HomeView, NoticeListView, NoticeView, Neo4jView, SystemView, \
-    UploadFileListView, UploadFileView, CorpusListView, UserView, UserListView, LoginAPIView
+from QAS.views import chat, corpus, home, login, upload, notice, user
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', HomeView.as_view()),
+    path('', home.HomeView.as_view()),
+    path('api/sysinfo/', home.SystemView.as_view()),
 
-    path('api/login/', LoginAPIView.as_view()),
-    path('api/user/', UserListView.as_view()),
-    path('api/user/<int:pk>/', UserView.as_view()),
+    path('api/login/', login.LoginAPIView.as_view()),
 
-    path('api/sysinfo/', SystemView.as_view()),
-    path('api/word/', NoticeListView.as_view()),
-    path('api/word/<int:pk>', NoticeView.as_view(), name='notice-detail'),
-    path('api/neo4j/', Neo4jView.as_view()),
-    path('api/neo4j/<int:pk>', Neo4jView.as_view()),
+    path('api/user/', user.UserListView.as_view()),
+    path('api/user/<int:pk>/', user.UserView.as_view()),
 
-    path('api/upload/', UploadFileListView.as_view()),
-    path('api/upload/<int:pk>/', UploadFileView.as_view()),
-    path('api/corpus/', CorpusListView.as_view()),
+    path('api/word/', notice.NoticeListView.as_view()),
+    path('api/word/<int:pk>', notice.NoticeView.as_view(), name='notice-detail'),
+
+    path('api/neo4j/', chat.Neo4jView.as_view()),
+    path('api/neo4j/<int:pk>', chat.Neo4jView.as_view()),
+
+    path('api/upload/', upload.UploadFileListView.as_view()),
+    path('api/upload/<int:pk>/', upload.UploadFileView.as_view()),
+
+    path('api/corpus/', corpus.CorpusListView.as_view()),
 
 ]
