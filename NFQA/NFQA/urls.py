@@ -15,7 +15,7 @@ Including another URLconf
 """
 
 from django.urls import path
-from QAS.views import chat, corpus, home, login, upload, notice, user
+from QAS.views import chat, corpus, home, login, upload, notice, user, docs
 
 urlpatterns = [
     path('', home.HomeView.as_view()),
@@ -38,5 +38,7 @@ urlpatterns = [
     path('api/upload/<int:pk>/', upload.UploadFileView.as_view()),
 
     path('api/corpus/', corpus.CorpusListView.as_view()),
+
+    path('api/docs/', docs.SwaggerSchemaView.as_view()),
 
 ]

@@ -9,12 +9,19 @@ from ..serializers import UserSerializer
 
 
 class UserListView(APIView):
+    """
+    get: user信息
+    post: 修改user信息
+    """
     authentication_classes = []
     permission_classes = []
 
     # @method_decorator(cache_page(60 * 60 * 2))
     # @method_decorator(vary_on_headers("Authorization", ))
     def get(self, request, *args, **kwargs):
+        """
+        Retrieve the registered users.
+        """
         users = User.objects.all()
         user_serializer = UserSerializer(users, many=True)
         paginator = GenericPagination()
@@ -23,6 +30,9 @@ class UserListView(APIView):
         return paginator.get_paginated_response(page_user_list)
 
     def post(self, request, *args, **kwargs):
+        """
+        Register a user.
+        """
         serializer = UserSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
@@ -42,11 +52,17 @@ class UserView(APIView):
             raise NotFound("NOT_FOUND")
 
     def get(self, request, pk, *args, **kwargs):
+        """
+        Retrieve a user by ID.
+        """
         user = self.get_object(pk)
         serializer = UserSerializer(user)
         return Response(serializer.data)
 
     def put(self, request, pk, *args, **kwargs):
+        """
+        Update a user by ID.
+        """
         user = self.get_object(pk)
         user.id = pk
         serializer = UserSerializer(user, data=request.data)
@@ -54,6 +70,9 @@ class UserView(APIView):
             return Response(serializer.data)
 
     def delete(self, request, pk, *args, **kwargs):
+        """
+        Delete a user by ID.
+        """
         user = self.get_object(pk)
         data = {"message": "Successfully Delete",
                 "user_id": user.user_id,

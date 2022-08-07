@@ -11,7 +11,7 @@ class CorpusListView(APIView):
 
     def get(self, request, *args, **kwargs):
         """
-        查询语料库
+        Retrieve the corpus.
         """
         with open(settings.STATIC_ROOT + '/dictionary/daily_chat.csv', "r", encoding='UTF-8') as corpus_file:
             reader = csv.DictReader(corpus_file)
@@ -21,6 +21,9 @@ class CorpusListView(APIView):
             return paginator.get_paginated_response(page_user_list)
 
     def post(self, request, *args, **kwargs):
+        """
+        Create a corpus.
+        """
         question = request.data.get("question")
         answer = request.data.get("answer")
         data = [question, answer]

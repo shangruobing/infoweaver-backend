@@ -22,10 +22,8 @@ except Exception:
 class Neo4jView(APIView):
     def get(self, request, pk, *args, **kwargs):
         """
-        根据图数据库中的文件id查询这个文件的标题
-        本方法是测试数据库连通性时候使用
-        :param request: 请求
-        :param pk: 文件ID
+        Retrieve the title of the file based on the file ID in the graph database.
+        This method is used when testing database connectivity.
         """
         cypher = f"match (n:Title)-[*2]-(t:abstract) where id(n)={pk} unwind t.name as answer return answer"
         answer = graph.run(cypher).data()
@@ -34,8 +32,8 @@ class Neo4jView(APIView):
 
     def post(self, request, *args, **kwargs):
         """
-        本方法是问答机器人的主方法
-        通过文件名匹配->Neo4j->百度百科的顺序依次进行查询
+        Question answering robot.
+        Search by file name match -> Neo4j -> Baidu Encyclopedia.
         """
         try:
             question = request.data['question']
@@ -74,7 +72,10 @@ class Neo4jView(APIView):
             return Response({"answer_type": answer_type.UNKNOWN, "results": None})
 
     def put(self, request, *args, **kwargs):
-
+        """
+        Multi-thread Bert model.
+        This is a test method.
+        """
         try:
             question = request.data['question']
             file_id = request.data['id']

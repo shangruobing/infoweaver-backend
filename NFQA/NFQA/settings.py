@@ -23,7 +23,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'corsheaders',
     'rest_framework',
-    'QAS'
+    'QAS',
+    'rest_framework_swagger',
 ]
 
 MIDDLEWARE = [
@@ -54,7 +55,11 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
             ],
+            'libraries': {
+                'staticfiles': 'django.templatetags.static',
+            },
         },
+
     },
 ]
 
@@ -160,7 +165,8 @@ REST_FRAMEWORK = {
     #
     "DEFAULT_PAGINATION_CLASS": {
         'QAS.pagination.GenericPagination'
-    }
+    },
+    'DEFAULT_SCHEMA_CLASS': 'rest_framework.schemas.AutoSchema'
 }
 
 APPEND_SLASH = True
@@ -188,4 +194,8 @@ AUTH_USER_MODEL = 'QAS.User'  # 自定义用户表
 #             "IGNORE_EXCEPTIONS": True,
 #         }
 #     }
+# }
+
+# SWAGGER_SETTINGS = {
+#     'SHOW_EXTENSIONS': False
 # }

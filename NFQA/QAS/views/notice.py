@@ -18,9 +18,9 @@ class NoticeListView(APIView):
 
     def get(self, request, *args, **kwargs):
         """
-        查询通知文件
-        如果没有指定条件，默认返回分页后的所有文件
-        可以通过 ?name&start_date&end_date 在URL中指出条件
+        Retrieve the Notification Files.
+        If no condition is specified, all files after paging are returned by default.
+        Can pass ?name&start_date&end_date indicates the condition in the URL.
         """
         notices = Notice.objects.all()
         notice_filter = NoticeFilterBackend()
@@ -32,7 +32,7 @@ class NoticeListView(APIView):
 
     def post(self, request, *args, **kwargs):
         """
-        通过发送POST请求,将位于Neo4j中的文件结点批量插入MySQL数据库
+        Batch insert file nodes located in Neo4j into MySQL database.
         """
         query = "MATCH (n:Title)-[*2]-(t:abstract) RETURN n,id(n),collect(t.name)"
         result = graph.run(query).data()
@@ -67,7 +67,7 @@ class NoticeView(APIView):
 
     def get(self, request, pk, *args, **kwargs):
         """
-        根据id查询单个通知文件
+        Retrieve a notification file by ID.
         """
         notices = self.get_object(pk)
         serializer = NoticeSerializer(notices, context={'request': request})
