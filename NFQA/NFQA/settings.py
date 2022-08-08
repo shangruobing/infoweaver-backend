@@ -5,8 +5,8 @@ from pathlib import Path
 from QAS.utils.db_conntcion import getRedisConnectivity
 
 # !!!通过设置是否开发模式，来动态修改数据库配置文件和是否Debug
-is_development_mode = True
-# is_development_mode = False
+# is_development_mode = True
+is_development_mode = False
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -185,10 +185,12 @@ JWT_AUTH = {
 
 AUTH_USER_MODEL = 'QAS.User'  # 自定义用户表
 
+REDIS_LOCATION = "redis://127.0.0.1:6379" if is_development_mode else "redis://43.138.43.128:6379"
+
 CACHES = {
     "default": {
         "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": "redis://127.0.0.1:6379",
+        "LOCATION": REDIS_LOCATION,
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
             # 忽略连接异常
