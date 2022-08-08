@@ -4,7 +4,8 @@ import jieba.posseg as pseg
 try:
     jieba.enable_paddle()
 except Exception:
-    raise RuntimeError("Paddle loading failed")
+    print("Paddle loading failed")
+    # raise RuntimeError("Paddle loading failed")
 
 
 class Cypher:

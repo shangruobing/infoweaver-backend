@@ -2,6 +2,8 @@ import os
 import datetime
 from pathlib import Path
 
+from QAS.utils.db_conntcion import getRedisConnectivity
+
 # !!!通过设置是否开发模式，来动态修改数据库配置文件和是否Debug
 is_development_mode = True
 # is_development_mode = False
@@ -32,7 +34,7 @@ MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
-    # 'django.middleware.csrf.CsrfViewMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
@@ -183,20 +185,21 @@ JWT_AUTH = {
 
 AUTH_USER_MODEL = 'QAS.User'  # 自定义用户表
 
-# REDIS_TIMEOUT=10
-# CACHES = {
-#     "default": {
-#         "BACKEND": "django_redis.cache.RedisCache",
-#         "LOCATION": "redis://127.0.0.1:6379",
-#         "OPTIONS": {
-#             # 忽略连接异常
-#             "CLIENT_CLASS": "django_redis.client.DefaultClient",
-#             "IGNORE_EXCEPTIONS": True,
-#         }
-#     }
-# }
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": "redis://127.0.0.1:6379",
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+            # 忽略连接异常
+            # "IGNORE_EXCEPTIONS": True,
+        }
+    }
+}
 
 SWAGGER_SETTINGS = {
     # 文档展开
     'DOC_EXPANSION': 'list'
 }
+
+getRedisConnectivity()

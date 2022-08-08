@@ -1,3 +1,4 @@
+from redis import Redis, exceptions
 from py2neo import Graph, errors
 from django.conf import settings
 
@@ -14,3 +15,12 @@ def getGraphInstance():
 
     except errors.ConnectionUnavailable:
         raise ConnectionError("Neo4j graph database connection failed")
+
+
+def getRedisConnectivity():
+    try:
+        instance = Redis()
+        if instance.ping():
+            print("Redis connected successfully")
+    except (ConnectionRefusedError, exceptions.ConnectionError):
+        raise ConnectionError("Redis connection failed")
