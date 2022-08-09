@@ -8,7 +8,6 @@ def getGraphInstance():
         if not settings.ENABLE_NEO4J:
             print("Neo4j Not Enabled")
             return None
-
         config = settings.DATABASES.get("neo4j")
         graph = Graph(config.get("HOST"), auth=(config.get("USER"), config.get("PASSWORD")))
         print("Neo4j graph database connected successfully")
@@ -20,8 +19,10 @@ def getGraphInstance():
 
 def getRedisConnectivity():
     try:
-        instance = Redis(host='0.0.0.0', port=6379, password='010209')
+        config = settings.DATABASES.get("redis")
+        instance = Redis(host=config.get("HOST"), port=config.get("PORT"), password=config.get("PASSWORD"))
         if instance.ping():
             print("Redis connected successfully")
     except (ConnectionRefusedError, exceptions.ConnectionError):
+        print('Redis Not Enabled')
         raise ConnectionError("Redis connection failed")

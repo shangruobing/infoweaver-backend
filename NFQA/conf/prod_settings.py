@@ -1,5 +1,4 @@
 from django.conf import settings
-from QAS.utils.db_connection import getRedisConnectivity
 
 DATABASES = {
     'default':
@@ -16,6 +15,12 @@ DATABASES = {
             'HOST': "http://43.138.43.128:7474",
             "USER": "neo4j",
             "PASSWORD": 'neo4j',
+        },
+    'redis':
+        {
+            'HOST': "43.138.43.128",
+            'PORT': 6379,
+            "PASSWORD": "010209"
         }
 }
 
@@ -33,8 +38,3 @@ CACHES = {
         }
     }
 }
-
-if settings.ENABLE_REDIS:
-    getRedisConnectivity()
-else:
-    print('Redis Not Enabled')

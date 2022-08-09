@@ -1,3 +1,4 @@
+from django.conf import settings
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -6,6 +7,10 @@ from django.views.decorators.cache import cache_page
 from django.views.decorators.vary import vary_on_cookie
 
 from ..utils.system_info import get_system_info
+from ..utils.db_connection import getRedisConnectivity
+
+if settings.ENABLE_REDIS:
+    getRedisConnectivity()
 
 
 class HomeView(APIView):
