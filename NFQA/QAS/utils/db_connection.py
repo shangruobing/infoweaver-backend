@@ -5,8 +5,9 @@ from django.conf import settings
 
 def getGraphInstance():
     try:
-        # Warning!!!
-        return None
+        if not settings.ENABLE_NEO4J:
+            print("Neo4j Not Enabled")
+            return None
 
         config = settings.DATABASES.get("neo4j")
         graph = Graph(config.get("HOST"), auth=(config.get("USER"), config.get("PASSWORD")))
@@ -19,7 +20,7 @@ def getGraphInstance():
 
 def getRedisConnectivity():
     try:
-        instance = Redis()
+        instance = Redis(host='0.0.0.0', port=6379, password='010209')
         if instance.ping():
             print("Redis connected successfully")
     except (ConnectionRefusedError, exceptions.ConnectionError):

@@ -1,8 +1,9 @@
 from rest_framework import status
+from django.conf import settings
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from ..classes.question import Question
-
+from ..classes.pretrained_model import BertModel
 from ..utils import answer_type
 from ..classes.query import graph
 from ..classes.chat import ChatManager
@@ -11,10 +12,12 @@ from ..utils.threads import MultithreadingBert
 from ..pagination import NoticePagination
 
 try:
-    # Warning!!!
-    model = None
-    # model = BertModel()
-    print("BERT model loaded successfully")
+    if not settings.ENABLE_BERT:
+        model = None
+        print("BERT Not Enabled")
+    else:
+        model = BertModel()
+        print("BERT model loaded successfully")
 except Exception:
     raise RuntimeError("BERT model load failed")
 

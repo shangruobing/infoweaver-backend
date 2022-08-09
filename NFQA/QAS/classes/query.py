@@ -7,7 +7,7 @@ from django.conf import settings
 
 from .cypher import Cypher
 from QAS.models import Notice
-from QAS.utils.db_conntcion import getGraphInstance
+from QAS.utils.db_connection import getGraphInstance
 from QAS.filters import NoticeFilterBackend
 from QAS.utils.str2date import str_date_range
 

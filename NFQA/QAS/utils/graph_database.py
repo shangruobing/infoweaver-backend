@@ -1,5 +1,5 @@
 from py2neo import Node
-from QAS.utils.db_conntcion import getGraphInstance
+from QAS.utils.db_connection import getGraphInstance
 
 graph = getGraphInstance()
 
